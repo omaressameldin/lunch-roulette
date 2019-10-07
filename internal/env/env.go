@@ -14,6 +14,7 @@ func ValidateEnvKeys() {
 	GetFirstRoundDate()
 	GetGroupSize()
 	GetDBName()
+	GetDBBucket()
 }
 
 func GetRoundFrequencyPerMonth() int {
@@ -66,4 +67,13 @@ func GetDBName() string {
 	}
 
 	return dbName
+}
+
+func GetDBBucket() string {
+	dbBucket, err := utils.GetEnv(dbBucketKey)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return dbBucket
 }

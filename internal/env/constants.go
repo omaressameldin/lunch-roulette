@@ -1,6 +1,7 @@
 package env
 
 const dbNameKey = "DB_NAME"
+const dbBucketKey = "DB_BUCKET"
 const roundStartKey = "ROUND_START"
 const minDayNumber = 0
 const maxDayNumber = 7
