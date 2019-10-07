@@ -9,30 +9,15 @@ import (
 )
 
 func ValidateEnvKeys() {
-	GetRoundStart()
 	GetRoundFrequencyPerMonth()
 	GetFirstRoundDate()
 	GetFirstRoundDate()
 	GetGroupSize()
-}
-
-func GetRoundStart() time.Weekday {
-	day, err := utils.GetEnv(roundStart)
-	if err != nil {
-		log.Fatal(err)
-	}
-	dayInt, err := strconv.Atoi(day)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if dayInt < minDayNumber || dayInt > maxDayNumber {
-		log.Fatalf("days need to be between %d and %d!", minDayNumber, maxDayNumber)
-	}
-	return time.Weekday(dayInt)
+	GetDBName()
 }
 
 func GetRoundFrequencyPerMonth() int {
-	frequency, err := utils.GetEnv(roundFrequency)
+	frequency, err := utils.GetEnv(roundFrequencyKey)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -45,7 +30,7 @@ func GetRoundFrequencyPerMonth() int {
 }
 
 func GetFirstRoundDate() time.Time {
-	timeStr, err := utils.GetEnv(firstRoundDate)
+	timeStr, err := utils.GetEnv(firstRoundDateKey)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -59,7 +44,7 @@ func GetFirstRoundDate() time.Time {
 }
 
 func GetGroupSize() int {
-	groupSize, err := utils.GetEnv(groupSize)
+	groupSize, err := utils.GetEnv(groupSizeKey)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -72,4 +57,13 @@ func GetGroupSize() int {
 		log.Fatalf("Group size must be greater than %d!", minGroupSize)
 	}
 	return groupSizeInt
+}
+
+func GetDBName() string {
+	dbName, err := utils.GetEnv(dbNameKey)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return dbName
 }
