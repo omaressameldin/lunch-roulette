@@ -25,7 +25,7 @@ func organizeLunch(d *db.DB, bot *slacker.Slacker) func() {
 func waitForRound(d *db.DB) {
 	freq := env.GetRoundFrequencyPerMonth()
 	firstRound := env.GetFirstRoundDate()
-	latestRound, err := d.GetRound(env.TimeLayout)
+	latestRound, err := d.GetNextRoundDate(env.TimeLayout)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -35,7 +35,7 @@ func waitForRound(d *db.DB) {
 	}
 	// add freq weeks to next round
 	err = utils.SleepTill(*latestRound)
-	d.CreateRound(env.TimeLayout, latestRound.AddDate(0, 0, 7*freq))
+	d.AddNextRoundDate(env.TimeLayout, latestRound.AddDate(0, 0, 7*freq))
 	if err != nil {
 		log.Fatal(err)
 	}

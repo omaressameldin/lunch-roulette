@@ -36,7 +36,7 @@ func (d *DB) CloseDB() {
 	d.database.Close()
 }
 
-func (d *DB) CreateRound(layout string, t time.Time) error {
+func (d *DB) AddNextRoundDate(layout string, t time.Time) error {
 	err := d.database.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(d.bucket)
 		return b.Put([]byte(latestRoundKey), []byte(t.Format(layout)))
@@ -48,7 +48,7 @@ func (d *DB) CreateRound(layout string, t time.Time) error {
 	return nil
 }
 
-func (d *DB) GetRound(layout string) (*time.Time, error) {
+func (d *DB) GetNextRoundDate(layout string) (*time.Time, error) {
 	var round []byte
 	err := d.database.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(d.bucket))
