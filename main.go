@@ -5,6 +5,7 @@ import (
 
 	"github.com/omaressameldin/lunch-roulette/internal/db"
 	"github.com/omaressameldin/lunch-roulette/internal/env"
+	"github.com/omaressameldin/lunch-roulette/pkg/actions"
 	"github.com/omaressameldin/lunch-roulette/pkg/bot"
 )
 
@@ -18,5 +19,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	go func() {
+		actions.HandleActions(b)
+	}()
 	b.StartListening()
 }

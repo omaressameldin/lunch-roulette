@@ -38,7 +38,7 @@ func selectFoodChannel(rtm *slack.RTM, channel string) error {
 
 	attachment := slack.Attachment{
 		Text:       selectChannelQuestion,
-		Color:      pendingColor,
+		Color:      colorPending,
 		CallbackID: selectChannelCallbackId,
 		Actions: []slack.AttachmentAction{
 			Select(

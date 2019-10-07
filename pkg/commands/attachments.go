@@ -4,7 +4,7 @@ import "github.com/nlopes/slack"
 
 func CancelButton() slack.AttachmentAction {
 	return slack.AttachmentAction{
-		Name:  CancelCallback,
+		Name:  CancelValue,
 		Text:  cancelText,
 		Type:  "button",
 		Style: "danger",
@@ -21,5 +21,12 @@ func Select(
 		Text:    text,
 		Type:    "select",
 		Options: options,
+	}
+}
+
+func DangerMessage(text string) slack.Attachment {
+	return slack.Attachment{
+		Text:  text,
+		Color: colorDanger,
 	}
 }

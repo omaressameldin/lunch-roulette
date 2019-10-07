@@ -1,11 +1,12 @@
 package commands
 
 // colors
-const pendingColor = "#f9a41b"
+const colorPending = "#f9a41b"
+const colorDanger = "#dc3545"
 
 // cancel button
 const cancelText = "Cancel"
-const CancelCallback = "cancel-request"
+const CancelValue = "cancel-request"
 
 // feed command
 const feedError = "Can not start feeding people"
