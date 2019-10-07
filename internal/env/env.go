@@ -36,7 +36,7 @@ func GetFirstRoundDate() time.Time {
 		log.Fatal(err)
 	}
 
-	t, err := time.Parse(timeLayout, timeStr)
+	t, err := time.Parse(TimeLayout, timeStr)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -76,4 +76,8 @@ func GetDBBucket() string {
 	}
 
 	return dbBucket
+}
+
+func GetToken() (string, error) {
+	return utils.GetEnv(tokenKey)
 }
