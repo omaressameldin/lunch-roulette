@@ -1,5 +1,6 @@
 package env
 
+const actionsPortKey = "ACTIONS_PORT"
 const dbNameKey = "DB_NAME"
 const dbBucketKey = "DB_BUCKET"
 const roundStartKey = "ROUND_START"

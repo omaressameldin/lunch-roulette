@@ -9,12 +9,22 @@ import (
 )
 
 func ValidateEnvKeys() {
+	GetActionPort()
 	GetRoundFrequencyPerMonth()
 	GetFirstRoundDate()
 	GetFirstRoundDate()
 	GetGroupSize()
 	GetDBName()
 	GetDBBucket()
+}
+
+func GetActionPort() string {
+	port, err := utils.GetEnv(actionsPortKey)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return port
 }
 
 func GetRoundFrequencyPerMonth() int {
@@ -78,6 +88,11 @@ func GetDBBucket() string {
 	return dbBucket
 }
 
-func GetToken() (string, error) {
-	return utils.GetEnv(tokenKey)
+func GetToken() string {
+	token, err := utils.GetEnv(tokenKey)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return token
 }
