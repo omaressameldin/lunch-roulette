@@ -36,3 +36,10 @@ func PendingMessage(text string) slack.Attachment {
 		Color: colorPending,
 	}
 }
+
+func SuccessMessage(text string) slack.Attachment {
+	return slack.Attachment{
+		Text:  text,
+		Color: colorSuccess,
+	}
+}

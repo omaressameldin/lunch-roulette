@@ -92,4 +92,14 @@ func setGroupSize(
 		sendCancelResponse(responseURL, w, err.Error())
 		return
 	}
+	successMessage, err := commands.DoneText(database)
+	if err != nil {
+		sendCancelResponse(responseURL, w, err.Error())
+		return
+	}
+	sendReply(responseURL, w, Reply{
+		Attachments: []slack.Attachment{
+			commands.SuccessMessage(successMessage),
+		},
+	})
 }

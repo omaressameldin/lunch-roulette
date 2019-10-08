@@ -99,3 +99,21 @@ func numberSelect(min int, max int, blockId string, title string) []slack.Block 
 		),
 	}
 }
+
+func DoneText(database *db.DB) (string, error) {
+	startDate, err := database.GetNextRoundDate()
+	channel, err := database.GetBotChannel()
+	frequency, err := database.GetFrequencyPerMonth()
+	size, err := database.GetGroupSize()
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf(
+		"🍔 Everything is Done! starting *%s*, *%d* members will be paired *%d* times a month for lunch. Stats will be posted on *%s*",
+		startDate.Format(timeLayout),
+		*size,
+		*frequency,
+		*channel,
+	), nil
+}

@@ -3,6 +3,7 @@ package commands
 // colors
 const colorPending = "#f9a41b"
 const colorDanger = "#dc3545"
+const colorSuccess = "#28a745"
 
 // cancel button
 const cancelText = "💣Cancel"
@@ -10,6 +11,7 @@ const CancelValue = "cancel-request"
 
 // messages
 const addingToDatabase = "⏳ Your response is being saved..."
+const timeLayout = "Mon Jan 2 15:04"
 
 // feed command
 const feedError = "Can not start feeding people"
