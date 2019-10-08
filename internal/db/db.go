@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/boltdb/bolt"
@@ -103,4 +104,34 @@ func (d *DB) GetBotChannel() (*string, error) {
 	}
 
 	return &stringifiedChannelID, nil
+}
+
+func (d *DB) AddFrequencyPerMonth(frequency int) error {
+	err := d.database.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket(d.bucket)
+		return b.Put([]byte(frequencyPerMonthKey), []byte(strconv.Itoa(frequency)))
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *DB) GetFrequencyPerMonth() (*int, error) {
+	var frequency []byte
+	err := d.database.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(d.bucket))
+		frequency = b.Get([]byte(frequencyPerMonthKey))
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	freqInt, err := strconv.Atoi(string(frequency))
+	if err != nil {
+		return nil, err
+	}
+	return &freqInt, nil
 }

@@ -25,6 +25,14 @@ func HandleActions(bot *bot.Bot) {
 					{
 						selectChannel(bot.DB, payload.ResponseURL, w, block.SelectedChannel)
 					}
+				case commands.FirstRoundStartBlockId:
+					{
+						setFirstRoundDate(bot.DB, payload.ResponseURL, w, block.SelectedDate)
+					}
+				case commands.FerquencyPerMonthBlockId:
+					{
+						setFrequencyPerMonth(bot.DB, payload.ResponseURL, w, block.Value)
+					}
 				}
 			}
 		}

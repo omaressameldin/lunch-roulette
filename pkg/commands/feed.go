@@ -2,6 +2,7 @@ package commands
 
 import (
 	"github.com/nlopes/slack"
+	"github.com/omaressameldin/lunch-roulette/internal/db"
 	"github.com/omaressameldin/lunch-roulette/internal/utils"
 	"github.com/shomali11/slacker"
 )
@@ -41,11 +42,11 @@ func selectFoodChannel(channel string, rtm *slack.RTM) error {
 		),
 	))
 	return nil
-	}
+}
 
 func PendingResponse() slack.Attachment {
 	return PendingMessage(addingToDatabase)
-	}
+}
 
 func AddChannelToDB(d *db.DB, channelID string) error {
 	return d.AddBotChannel(channelID)
@@ -59,7 +60,7 @@ func FirstRoundDate() []slack.Block {
 			[]slack.MixedElement{
 				slack.NewTextBlockObject("mrkdwn", firstRoundStartText, false, false),
 			}...,
-			),
+		),
 		slack.NewActionBlock(
 			FirstRoundStartBlockId,
 			slack.NewDatePickerBlockElement(firstRoundKey),
@@ -68,6 +69,29 @@ func FirstRoundDate() []slack.Block {
 	}
 }
 
-	rtm.PostMessage(channel, slack.MsgOptionAttachments(attachment))
-	return nil
+func FrequencyPerMonth() []slack.Block {
+	return []slack.Block{
+		slack.NewContextBlock(
+			"",
+			[]slack.MixedElement{
+				slack.NewTextBlockObject("mrkdwn", frequencyPerMonthText, false, false),
+			}...,
+		),
+		slack.NewActionBlock(
+			FerquencyPerMonthBlockId,
+			slack.NewButtonBlockElement(
+				"", "1", slack.NewTextBlockObject("plain_text", "One", false, false),
+			),
+			slack.NewButtonBlockElement(
+				"", "2", slack.NewTextBlockObject("plain_text", "Two", false, false),
+			),
+			slack.NewButtonBlockElement(
+				"", "3", slack.NewTextBlockObject("plain_text", "Three", false, false),
+			),
+			slack.NewButtonBlockElement(
+				"", "4", slack.NewTextBlockObject("plain_text", "Four", false, false),
+			),
+			CancelButton(),
+		),
+	}
 }

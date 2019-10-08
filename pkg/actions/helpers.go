@@ -3,7 +3,6 @@ package actions
 import (
 	"bytes"
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/nlopes/slack"
@@ -49,6 +48,5 @@ func sendPendingResponse(url string, w http.ResponseWriter) {
 
 func sendReply(url string, w http.ResponseWriter, r Reply) {
 	jsonValue, _ := json.Marshal(r)
-	log.Println(string(jsonValue))
 	http.Post(url, "application/json", bytes.NewBuffer(jsonValue))
 }
