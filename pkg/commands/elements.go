@@ -2,13 +2,12 @@ package commands
 
 import "github.com/nlopes/slack"
 
-func CancelButton() slack.AttachmentAction {
-	return slack.AttachmentAction{
-		Name:  CancelValue,
-		Text:  cancelText,
-		Type:  "button",
-		Style: "danger",
-	}
+func CancelButton() slack.BlockElement {
+	return slack.NewButtonBlockElement(
+		CancelValue,
+		CancelValue,
+		slack.NewTextBlockObject("plain_text", cancelText, false, false),
+	)
 }
 
 func Select(
@@ -28,5 +27,12 @@ func DangerMessage(text string) slack.Attachment {
 	return slack.Attachment{
 		Text:  text,
 		Color: colorDanger,
+	}
+}
+
+func PendingMessage(text string) slack.Attachment {
+	return slack.Attachment{
+		Text:  text,
+		Color: colorPending,
 	}
 }

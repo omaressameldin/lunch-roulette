@@ -17,34 +17,39 @@ func feed() *slacker.CommandDefinition {
 			channel := request.Event().Channel
 			rtm := response.RTM()
 
-			utils.ReplyWithError(selectFoodChannel(rtm, channel), feedError, response)
+			utils.ReplyWithError(selectFoodChannel(channel, rtm), feedError, response)
 		},
 	}
 }
 
-func selectFoodChannel(rtm *slack.RTM, channel string) error {
-	channels, err := rtm.GetChannels(true)
-	if err != nil {
-		return err
+func selectFoodChannel(channel string, rtm *slack.RTM) error {
+	rtm.PostMessage(channel, slack.MsgOptionBlocks(
+		slack.NewContextBlock(
+			"",
+			[]slack.MixedElement{
+				slack.NewTextBlockObject("mrkdwn", selectChannelQuestion, false, false),
+			}...,
+		),
+		slack.NewActionBlock(
+			SelectChannelBlockId,
+			slack.NewOptionsSelectBlockElement(
+				"channels_select",
+				slack.NewTextBlockObject("plain_text", selectChannelPlaceholder, false, false),
+				FoodChannelKey,
+			),
+			CancelButton(),
+		),
+	))
+	return nil
 	}
 
-	options := make([]slack.AttachmentActionOption, len(channels))
-	for _, channel := range channels {
-		options = append(options, slack.AttachmentActionOption{
-			Text:  channel.Name,
-			Value: channel.ID,
-		})
+func PendingResponse() slack.Attachment {
+	return PendingMessage(addingToDatabase)
 	}
 
-	attachment := slack.Attachment{
-		Text:       selectChannelQuestion,
-		Color:      colorPending,
-		CallbackID: selectChannelCallbackId,
-		Actions: []slack.AttachmentAction{
-			Select(
-				selectChannelPlaceholder,
-				foodChannelKey,
-				options,
+func AddChannelToDB(d *db.DB, channelID string) error {
+	return d.AddBotChannel(channelID)
+}
 			),
 			CancelButton(),
 		},
