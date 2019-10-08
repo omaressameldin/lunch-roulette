@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/nlopes/slack"
+	"github.com/shomali11/slacker"
+
 	"github.com/omaressameldin/lunch-roulette/internal/db"
 	"github.com/omaressameldin/lunch-roulette/pkg/commands"
 )
@@ -76,6 +78,7 @@ func setFrequencyPerMonth(
 }
 
 func setGroupSize(
+	bot *slacker.Slacker,
 	database *db.DB,
 	responseURL string,
 	w http.ResponseWriter,
@@ -92,7 +95,7 @@ func setGroupSize(
 		sendCancelResponse(responseURL, w, err.Error())
 		return
 	}
-	successMessage, err := commands.DoneText(database)
+	successMessage, err := commands.DoneText(database, bot)
 	if err != nil {
 		sendCancelResponse(responseURL, w, err.Error())
 		return

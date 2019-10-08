@@ -100,11 +100,15 @@ func numberSelect(min int, max int, blockId string, title string) []slack.Block 
 	}
 }
 
-func DoneText(database *db.DB) (string, error) {
+func DoneText(database *db.DB, bot *slacker.Slacker) (string, error) {
 	startDate, err := database.GetNextRoundDate()
-	channel, err := database.GetBotChannel()
+	channelID, err := database.GetBotChannel()
 	frequency, err := database.GetFrequencyPerMonth()
 	size, err := database.GetGroupSize()
+	if err != nil {
+		return "", err
+	}
+	channelInfo, err := bot.RTM().GetChannelInfo(*channelID)
 	if err != nil {
 		return "", err
 	}
@@ -114,6 +118,6 @@ func DoneText(database *db.DB) (string, error) {
 		startDate.Format(timeLayout),
 		*size,
 		*frequency,
-		*channel,
+		channelInfo.Name,
 	), nil
 }

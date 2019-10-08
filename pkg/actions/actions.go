@@ -35,7 +35,7 @@ func HandleActions(bot *bot.Bot) {
 					}
 				case commands.GroupSizeBlockId:
 					{
-						setGroupSize(bot.DB, payload.ResponseURL, w, block.Value)
+						setGroupSize(bot.SlackBot, bot.DB, payload.ResponseURL, w, block.Value)
 					}
 				}
 			}
