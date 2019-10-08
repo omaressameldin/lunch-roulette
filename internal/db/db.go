@@ -69,3 +69,33 @@ func (d *DB) GetNextRoundDate(layout string) (*time.Time, error) {
 
 	return &t, nil
 }
+
+func (d *DB) AddBotChannel(channelID string) error {
+	err := d.database.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket(d.bucket)
+		return b.Put([]byte(botChannelKey), []byte(channelID))
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *DB) GetBotChannel() (*string, error) {
+	var channelID []byte
+	err := d.database.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(d.bucket))
+		channelID = b.Get([]byte(botChannelKey))
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	stringifiedChannelID := string(channelID)
+	if stringifiedChannelID == "" {
+		return nil, nil
+	}
+
+	return &stringifiedChannelID, nil
+}
