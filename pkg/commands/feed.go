@@ -50,10 +50,23 @@ func PendingResponse() slack.Attachment {
 func AddChannelToDB(d *db.DB, channelID string) error {
 	return d.AddBotChannel(channelID)
 }
+
+func FirstRoundDate() []slack.Block {
+
+	return []slack.Block{
+		slack.NewContextBlock(
+			"",
+			[]slack.MixedElement{
+				slack.NewTextBlockObject("mrkdwn", firstRoundStartText, false, false),
+			}...,
 			),
+		slack.NewActionBlock(
+			FirstRoundStartBlockId,
+			slack.NewDatePickerBlockElement(firstRoundKey),
 			CancelButton(),
-		},
+		),
 	}
+}
 
 	rtm.PostMessage(channel, slack.MsgOptionAttachments(attachment))
 	return nil

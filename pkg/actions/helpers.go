@@ -3,6 +3,7 @@ package actions
 import (
 	"bytes"
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/nlopes/slack"
@@ -11,6 +12,7 @@ import (
 
 type Reply struct {
 	Attachments []slack.Attachment `json:"attachments"`
+	Blocks      []slack.Block      `json:"blocks"`
 	Text        string             `json:"text"`
 }
 
@@ -39,7 +41,14 @@ func sendCancelResponse(url string, w http.ResponseWriter, text string) {
 	})
 }
 
+func sendPendingResponse(url string, w http.ResponseWriter) {
+	sendReply(url, w, Reply{
+		Attachments: []slack.Attachment{commands.PendingResponse()},
+	})
+}
+
 func sendReply(url string, w http.ResponseWriter, r Reply) {
 	jsonValue, _ := json.Marshal(r)
+	log.Println(string(jsonValue))
 	http.Post(url, "application/json", bytes.NewBuffer(jsonValue))
 }

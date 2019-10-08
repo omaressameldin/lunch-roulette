@@ -7,6 +7,7 @@ import (
 
 	"github.com/omaressameldin/lunch-roulette/internal/env"
 	"github.com/omaressameldin/lunch-roulette/pkg/bot"
+	"github.com/omaressameldin/lunch-roulette/pkg/commands"
 )
 
 func HandleActions(bot *bot.Bot) {
@@ -17,6 +18,14 @@ func HandleActions(bot *bot.Bot) {
 
 			if mightCancel(payload, w) {
 				return
+			}
+			for _, block := range payload.ActionCallback.BlockActions {
+				switch block.BlockID {
+				case commands.SelectChannelBlockId:
+					{
+						selectChannel(bot.DB, payload.ResponseURL, w, block.SelectedChannel)
+					}
+				}
 			}
 		}
 	})

@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -36,10 +37,14 @@ func (d *DB) CloseDB() {
 	d.database.Close()
 }
 
-func (d *DB) AddNextRoundDate(layout string, t time.Time) error {
+func (d *DB) AddNextRoundDate(t time.Time) error {
+	if t.Before(time.Now()) {
+		return fmt.Errorf("Next Round Date has to be in the future!")
+	}
+
 	err := d.database.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(d.bucket)
-		return b.Put([]byte(latestRoundKey), []byte(t.Format(layout)))
+		return b.Put([]byte(latestRoundKey), []byte(t.Format(timeLayout)))
 	})
 	if err != nil {
 		return err
