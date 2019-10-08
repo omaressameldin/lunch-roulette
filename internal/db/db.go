@@ -54,7 +54,7 @@ func (d *DB) AddNextRoundDate(t time.Time) error {
 	return nil
 }
 
-func (d *DB) GetNextRoundDate(layout string) (*time.Time, error) {
+func (d *DB) GetNextRoundDate() (*time.Time, error) {
 	var round []byte
 	err := d.database.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(d.bucket))
@@ -68,7 +68,7 @@ func (d *DB) GetNextRoundDate(layout string) (*time.Time, error) {
 		return nil, nil
 	}
 
-	t, err := time.Parse(layout, string(round))
+	t, err := time.Parse(timeLayout, string(round))
 	if err != nil {
 		return nil, err
 	}
@@ -123,6 +123,36 @@ func (d *DB) GetFrequencyPerMonth() (*int, error) {
 	err := d.database.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(d.bucket))
 		frequency = b.Get([]byte(frequencyPerMonthKey))
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	freqInt, err := strconv.Atoi(string(frequency))
+	if err != nil {
+		return nil, err
+	}
+	return &freqInt, nil
+}
+
+func (d *DB) AddGroupSize(groupSize int) error {
+	err := d.database.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket(d.bucket)
+		return b.Put([]byte(groupSizeKey), []byte(strconv.Itoa(groupSize)))
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *DB) GetGroupSize() (*int, error) {
+	var frequency []byte
+	err := d.database.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(d.bucket))
+		frequency = b.Get([]byte(groupSizeKey))
 		return nil
 	})
 	if err != nil {

@@ -32,4 +32,7 @@ const RoundTime = "12:00"
 const FerquencyPerMonthBlockId = "set-frequency-per-month"
 const frequencyPerMonthText = "_*🕥 how many times per month do you wanna schedule lunches?*_"
 const frequencyPerMonyhPlaceholder = "pick frequency"
-const frequencyPerMonthKey = "frequency-per-month"
+
+// ---- set group size ----
+const GroupSizeBlockId = "set-group-size"
+const groupSizeText = "_* 🙍👱🙍👱 How many people should be paired in one group?*_"

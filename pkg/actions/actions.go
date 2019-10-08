@@ -33,6 +33,10 @@ func HandleActions(bot *bot.Bot) {
 					{
 						setFrequencyPerMonth(bot.DB, payload.ResponseURL, w, block.Value)
 					}
+				case commands.GroupSizeBlockId:
+					{
+						setGroupSize(bot.DB, payload.ResponseURL, w, block.Value)
+					}
 				}
 			}
 		}

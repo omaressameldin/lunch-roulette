@@ -1,6 +1,9 @@
 package commands
 
 import (
+	"fmt"
+
+	"github.com/divan/num2words"
 	"github.com/nlopes/slack"
 	"github.com/omaressameldin/lunch-roulette/internal/db"
 	"github.com/omaressameldin/lunch-roulette/internal/utils"
@@ -48,12 +51,7 @@ func PendingResponse() slack.Attachment {
 	return PendingMessage(addingToDatabase)
 }
 
-func AddChannelToDB(d *db.DB, channelID string) error {
-	return d.AddBotChannel(channelID)
-}
-
 func FirstRoundDate() []slack.Block {
-
 	return []slack.Block{
 		slack.NewContextBlock(
 			"",
@@ -70,28 +68,34 @@ func FirstRoundDate() []slack.Block {
 }
 
 func FrequencyPerMonth() []slack.Block {
+	return numberSelect(1, 4, FerquencyPerMonthBlockId, frequencyPerMonthText)
+}
+
+func GroupSize() []slack.Block {
+	return numberSelect(2, 6, GroupSizeBlockId, groupSizeText)
+}
+
+func numberSelect(min int, max int, blockId string, title string) []slack.Block {
+	elements := make([]slack.BlockElement, 0, max-min+1)
+	for i := min; i <= max; i++ {
+		elements = append(elements, slack.NewButtonBlockElement(
+			"",
+			fmt.Sprintf("%d", i),
+			slack.NewTextBlockObject("plain_text", num2words.Convert(i), false, false),
+		))
+	}
+	elements = append(elements, CancelButton())
+
 	return []slack.Block{
 		slack.NewContextBlock(
 			"",
 			[]slack.MixedElement{
-				slack.NewTextBlockObject("mrkdwn", frequencyPerMonthText, false, false),
+				slack.NewTextBlockObject("mrkdwn", title, false, false),
 			}...,
 		),
 		slack.NewActionBlock(
-			FerquencyPerMonthBlockId,
-			slack.NewButtonBlockElement(
-				"", "1", slack.NewTextBlockObject("plain_text", "One", false, false),
-			),
-			slack.NewButtonBlockElement(
-				"", "2", slack.NewTextBlockObject("plain_text", "Two", false, false),
-			),
-			slack.NewButtonBlockElement(
-				"", "3", slack.NewTextBlockObject("plain_text", "Three", false, false),
-			),
-			slack.NewButtonBlockElement(
-				"", "4", slack.NewTextBlockObject("plain_text", "Four", false, false),
-			),
-			CancelButton(),
+			blockId,
+			elements...,
 		),
 	}
 }

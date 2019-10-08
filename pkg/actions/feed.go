@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/nlopes/slack"
 	"github.com/omaressameldin/lunch-roulette/internal/db"
 	"github.com/omaressameldin/lunch-roulette/pkg/commands"
 )
@@ -17,12 +18,10 @@ func selectChannel(
 	selectedChannel string,
 ) {
 	sendPendingResponse(responseURL, w)
-	err := commands.AddChannelToDB(
-		database,
-		selectedChannel,
-	)
+	err := database.AddBotChannel(selectedChannel)
 	if err != nil {
 		sendCancelResponse(responseURL, w, err.Error())
+		return
 	}
 	sendReply(responseURL, w, Reply{
 		Blocks: commands.FirstRoundDate(),
@@ -41,11 +40,13 @@ func setFirstRoundDate(
 	)
 	if err != nil {
 		sendCancelResponse(responseURL, w, err.Error())
+		return
 	}
 	sendPendingResponse(responseURL, w)
 	err = database.AddNextRoundDate(nextRound)
 	if err != nil {
 		sendCancelResponse(responseURL, w, err.Error())
+		return
 	}
 	sendReply(responseURL, w, Reply{
 		Blocks: commands.FrequencyPerMonth(),
@@ -61,10 +62,34 @@ func setFrequencyPerMonth(
 	frequency, err := strconv.Atoi(selectedFrequency)
 	if err != nil {
 		sendCancelResponse(responseURL, w, err.Error())
+		return
 	}
 	sendPendingResponse(responseURL, w)
 	err = database.AddFrequencyPerMonth(frequency)
 	if err != nil {
 		sendCancelResponse(responseURL, w, err.Error())
+		return
+	}
+	sendReply(responseURL, w, Reply{
+		Blocks: commands.GroupSize(),
+	})
+}
+
+func setGroupSize(
+	database *db.DB,
+	responseURL string,
+	w http.ResponseWriter,
+	selectedize string,
+) {
+	frequency, err := strconv.Atoi(selectedize)
+	if err != nil {
+		sendCancelResponse(responseURL, w, err.Error())
+		return
+	}
+	sendPendingResponse(responseURL, w)
+	err = database.AddGroupSize(frequency)
+	if err != nil {
+		sendCancelResponse(responseURL, w, err.Error())
+		return
 	}
 }
