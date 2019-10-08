@@ -13,19 +13,11 @@ func HandleActions(bot *bot.Bot) {
 	port := env.GetActionPort()
 	http.HandleFunc(route, func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
-			payload, err := unmarshalPayload(r)
-			if err != nil {
-				sendCancelResponse(w, err.Error())
-				return
-			}
+			payload, _ := unmarshalPayload(r)
 
 			if mightCancel(payload, w) {
 				return
 			}
-
-			switch payload.CallbackID {
-			}
-
 		}
 	})
 	log.Printf("listening on port %s\n", port)

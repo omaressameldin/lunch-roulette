@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 
@@ -24,21 +25,21 @@ func unmarshalPayload(r *http.Request) (*slack.InteractionCallback, error) {
 }
 
 func mightCancel(payload *slack.InteractionCallback, w http.ResponseWriter) bool {
-	isCancel := payload.ActionCallback.AttachmentActions[0].Name == commands.CancelValue
+	isCancel := payload.ActionCallback.BlockActions[0].Value == commands.CancelValue
 	if isCancel {
-		sendCancelResponse(w, canceledRequest)
+		sendCancelResponse(payload.ResponseURL, w, canceledRequest)
 	}
 
 	return isCancel
 }
 
-func sendCancelResponse(w http.ResponseWriter, text string) {
-	sendReply(w, Reply{
+func sendCancelResponse(url string, w http.ResponseWriter, text string) {
+	sendReply(url, w, Reply{
 		Attachments: []slack.Attachment{commands.DangerMessage(text)},
 	})
 }
 
-func sendReply(w http.ResponseWriter, r Reply) {
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(r)
+func sendReply(url string, w http.ResponseWriter, r Reply) {
+	jsonValue, _ := json.Marshal(r)
+	http.Post(url, "application/json", bytes.NewBuffer(jsonValue))
 }
