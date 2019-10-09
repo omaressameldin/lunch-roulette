@@ -25,6 +25,7 @@ const feedDesc = "Pair group of people together for company paid lunch"
 const selectChannelQuestion = "_*📰 Which channel do you wanna link the bot to?*_"
 const SelectChannelBlockID = "select-food-channel"
 const selectChannelPlaceholder = "pick a channel"
+const selectChannelWarning = "_*⏰Note:*_  `If you choose a channel that is already linked previous data for this channel will be overridden`"
 const FoodChannelKey = "food-channel"
 
 // ---- set first round date -----

@@ -33,6 +33,12 @@ func selectFoodChannel(channel string, rtm *slack.RTM) error {
 				slack.NewTextBlockObject("mrkdwn", selectChannelQuestion, false, false),
 			}...,
 		),
+		slack.NewContextBlock(
+			"",
+			[]slack.MixedElement{
+				slack.NewTextBlockObject("mrkdwn", selectChannelWarning, false, false),
+			}...,
+		),
 		slack.NewActionBlock(
 			SelectChannelBlockID,
 			slack.NewOptionsSelectBlockElement(
