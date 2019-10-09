@@ -11,7 +11,7 @@ const CancelValue = "cancel-request"
 
 // messages
 const addingToDatabase = "⏳ Your response is being saved..."
-const timeLayout = "Mon Jan 2 15:04"
+const timeLayout = "Mon Jan 2 15:04 MST"
 
 // number select
 const NumberActionSeparator = "____"
@@ -31,7 +31,7 @@ const FoodChannelKey = "food-channel"
 // ---- set first round date -----
 const FirstRoundStartBlockID = "set-first-round-start"
 const firstRoundStartText = "_*📅 When should the first round start?*_"
-const RoundTime = "12:00"
+const RoundTime = "15:30"
 
 // ---- set frequency per month -----
 const FerquencyPerMonthBlockID = "set-frequency-per-month"
@@ -41,3 +41,6 @@ const frequencyPerMonyhPlaceholder = "pick frequency"
 // ---- set group size ----
 const GroupSizeBlockID = "set-group-size"
 const groupSizeText = "_* 🙍👱🙍👱 How many people should be paired in one group?*_"
+
+// organize
+const membersSelected = "*congratulations🥳* You have been selected for a *free* lunch for this month!"
