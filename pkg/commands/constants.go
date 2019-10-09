@@ -13,6 +13,9 @@ const CancelValue = "cancel-request"
 const addingToDatabase = "⏳ Your response is being saved..."
 const timeLayout = "Mon Jan 2 15:04"
 
+// number select
+const NumberActionSeparator = "____"
+
 // feed command
 const feedError = "Can not start feeding people"
 const feedCmd = "feed"

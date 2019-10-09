@@ -74,36 +74,7 @@ func GroupSize() []slack.Block {
 	return numberSelect(2, 6, GroupSizeBlockId, groupSizeText)
 }
 
-func numberSelect(min int, max int, blockId string, title string) []slack.Block {
-	elements := make([]slack.BlockElement, 0, max-min+1)
-	for i := min; i <= max; i++ {
-		elements = append(elements, slack.NewButtonBlockElement(
-			"",
-			fmt.Sprintf("%d", i),
-			slack.NewTextBlockObject("plain_text", num2words.Convert(i), false, false),
-		))
-	}
-	elements = append(elements, CancelButton())
 
-	return []slack.Block{
-		slack.NewContextBlock(
-			"",
-			[]slack.MixedElement{
-				slack.NewTextBlockObject("mrkdwn", title, false, false),
-			}...,
-		),
-		slack.NewActionBlock(
-			blockId,
-			elements...,
-		),
-	}
-}
-
-func DoneText(database *db.DB, bot *slacker.Slacker) (string, error) {
-	startDate, err := database.GetNextRoundDate()
-	channelID, err := database.GetBotChannel()
-	frequency, err := database.GetFrequencyPerMonth()
-	size, err := database.GetGroupSize()
 	if err != nil {
 		return "", err
 	}

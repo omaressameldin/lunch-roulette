@@ -1,6 +1,11 @@
 package commands
 
-import "github.com/nlopes/slack"
+import (
+	"fmt"
+
+	"github.com/divan/num2words"
+	"github.com/nlopes/slack"
+)
 
 func CancelButton() slack.BlockElement {
 	return slack.NewButtonBlockElement(
@@ -41,5 +46,36 @@ func SuccessMessage(text string) slack.Attachment {
 	return slack.Attachment{
 		Text:  text,
 		Color: colorSuccess,
+	}
+}
+
+func numberSelect(
+	min int,
+	max int,
+	blockID string,
+	actionID string,
+	title string,
+) []slack.Block {
+	elements := make([]slack.BlockElement, 0, max-min+1)
+	for i := min; i <= max; i++ {
+		elements = append(elements, slack.NewButtonBlockElement(
+			fmt.Sprintf("%s%s%d", actionID, NumberActionSeparator, i),
+			fmt.Sprintf("%d", i),
+			slack.NewTextBlockObject("plain_text", num2words.Convert(i), false, false),
+		))
+	}
+	elements = append(elements, CancelButton())
+
+	return []slack.Block{
+		slack.NewContextBlock(
+			"",
+			[]slack.MixedElement{
+				slack.NewTextBlockObject("mrkdwn", title, false, false),
+			}...,
+		),
+		slack.NewActionBlock(
+			blockID,
+			elements...,
+		),
 	}
 }
