@@ -12,25 +12,19 @@ import (
 
 type DB struct {
 	database *bolt.DB
-	bucket   []byte
 }
 
 func OpenDB() *DB {
 	dbName := env.GetDBName()
-	bucketName := env.GetDBBucket()
-	bucket := []byte(bucketName)
+
+	var err error
 	db, err := bolt.Open(dbName, 0600, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
-	db.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists(bucket)
-		return err
-	})
 
 	return &DB{
 		database: db,
-		bucket:   bucket,
 	}
 }
 
@@ -38,14 +32,25 @@ func (d *DB) CloseDB() {
 	d.database.Close()
 }
 
-func (d *DB) AddNextRoundDate(t time.Time) error {
+func (d *DB) AddBotChannel(channelID string) error {
+	return d.database.Update(func(tx *bolt.Tx) error {
+		_, err := tx.CreateBucketIfNotExists([]byte(channelID))
+		return err
+	})
+}
+
+func (d *DB) AddNextRoundDate(channelID string, t time.Time) error {
 	if t.Before(time.Now()) {
 		return fmt.Errorf("Next Round Date has to be in the future!")
 	}
 
 	err := d.database.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket(d.bucket)
-		return b.Put([]byte(latestRoundKey), []byte(t.Format(timeLayout)))
+		b, err := getScheduleBucket(channelID, tx)
+		if err != nil {
+			return err
+		}
+
+		return b.Put([]byte(keyNextRound), []byte(t.Format(timeLayout)))
 	})
 	if err != nil {
 		return err
@@ -54,13 +59,18 @@ func (d *DB) AddNextRoundDate(t time.Time) error {
 	return nil
 }
 
-func (d *DB) GetNextRoundDate() (*time.Time, error) {
+func (d *DB) GetNextRoundDate(channelID string) (*time.Time, error) {
 	var round []byte
 	err := d.database.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(d.bucket))
-		round = b.Get([]byte(latestRoundKey))
+		b, err := getScheduleBucket(channelID, tx)
+		if err != nil {
+			return err
+		}
+
+		round = b.Get([]byte(keyNextRound))
 		return nil
 	})
+
 	if err != nil {
 		return nil, err
 	}
@@ -76,10 +86,14 @@ func (d *DB) GetNextRoundDate() (*time.Time, error) {
 	return &t, nil
 }
 
-func (d *DB) AddBotChannel(channelID string) error {
+func (d *DB) AddFrequencyPerMonth(channelID string, frequency int) error {
 	err := d.database.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket(d.bucket)
-		return b.Put([]byte(botChannelKey), []byte(channelID))
+		b, err := getScheduleBucket(channelID, tx)
+		if err != nil {
+			return err
+		}
+
+		return b.Put([]byte(keyFrequencyPerMonth), []byte(strconv.Itoa(frequency)))
 	})
 	if err != nil {
 		return err
@@ -88,47 +102,25 @@ func (d *DB) AddBotChannel(channelID string) error {
 	return nil
 }
 
-func (d *DB) GetBotChannel() (*string, error) {
-	var channelID []byte
+func (d *DB) GetFrequencyPerMonth(channelID string) (*int, error) {
+	var frequency []byte
 	err := d.database.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(d.bucket))
-		channelID = b.Get([]byte(botChannelKey))
+		b, err := getScheduleBucket(channelID, tx)
+		if err != nil {
+			return err
+		}
+
+		frequency = b.Get([]byte(keyFrequencyPerMonth))
 		return nil
 	})
+
 	if err != nil {
 		return nil, err
 	}
-	stringifiedChannelID := string(channelID)
-	if stringifiedChannelID == "" {
+	if string(frequency) == "" {
 		return nil, nil
 	}
 
-	return &stringifiedChannelID, nil
-}
-
-func (d *DB) AddFrequencyPerMonth(frequency int) error {
-	err := d.database.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket(d.bucket)
-		return b.Put([]byte(frequencyPerMonthKey), []byte(strconv.Itoa(frequency)))
-	})
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (d *DB) GetFrequencyPerMonth() (*int, error) {
-	var frequency []byte
-	err := d.database.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(d.bucket))
-		frequency = b.Get([]byte(frequencyPerMonthKey))
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
-
 	freqInt, err := strconv.Atoi(string(frequency))
 	if err != nil {
 		return nil, err
@@ -136,11 +128,16 @@ func (d *DB) GetFrequencyPerMonth() (*int, error) {
 	return &freqInt, nil
 }
 
-func (d *DB) AddGroupSize(groupSize int) error {
+func (d *DB) AddGroupSize(channelID string, groupSize int) error {
 	err := d.database.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket(d.bucket)
-		return b.Put([]byte(groupSizeKey), []byte(strconv.Itoa(groupSize)))
+		b, err := getScheduleBucket(channelID, tx)
+		if err != nil {
+			return err
+		}
+
+		return b.Put([]byte(keyGroupSize), []byte(strconv.Itoa(groupSize)))
 	})
+
 	if err != nil {
 		return err
 	}
@@ -148,20 +145,38 @@ func (d *DB) AddGroupSize(groupSize int) error {
 	return nil
 }
 
-func (d *DB) GetGroupSize() (*int, error) {
-	var frequency []byte
+func (d *DB) GetGroupSize(channelID string) (*int, error) {
+	var size []byte
 	err := d.database.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(d.bucket))
-		frequency = b.Get([]byte(groupSizeKey))
+		b, err := getScheduleBucket(channelID, tx)
+		if err != nil {
+			return err
+		}
+		size = b.Get([]byte(keyGroupSize))
+
 		return nil
 	})
+
 	if err != nil {
 		return nil, err
+	}
+	if string(size) == "" {
+		return nil, nil
 	}
 
-	freqInt, err := strconv.Atoi(string(frequency))
+	sizeInt, err := strconv.Atoi(string(size))
 	if err != nil {
 		return nil, err
 	}
-	return &freqInt, nil
+	return &sizeInt, nil
+}
+
+func getScheduleBucket(channelID string, tx *bolt.Tx) (*bolt.Bucket, error) {
+	bucketName := []byte(channelID)
+	b := tx.Bucket(bucketName)
+	if b == nil {
+		return nil, bucketError
+	}
+
+	return b, nil
 }

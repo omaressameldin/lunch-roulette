@@ -13,6 +13,9 @@ const CancelValue = "cancel-request"
 const addingToDatabase = "⏳ Your response is being saved..."
 const timeLayout = "Mon Jan 2 15:04"
 
+// number select
+const NumberActionSeparator = "____"
+
 // feed command
 const feedError = "Can not start feeding people"
 const feedCmd = "feed"
@@ -20,21 +23,21 @@ const feedDesc = "Pair group of people together for company paid lunch"
 
 // ---- select channel -----
 const selectChannelQuestion = "_*📰 Which channel do you wanna link the bot to?*_"
-const SelectChannelBlockId = "select-food-channel"
+const SelectChannelBlockID = "select-food-channel"
 const selectChannelPlaceholder = "pick a channel"
+const selectChannelWarning = "_*⏰Note:*_  `If you choose a channel that is already linked previous data for this channel will be overridden`"
 const FoodChannelKey = "food-channel"
 
 // ---- set first round date -----
-const FirstRoundStartBlockId = "set-first-round-start"
+const FirstRoundStartBlockID = "set-first-round-start"
 const firstRoundStartText = "_*📅 When should the first round start?*_"
-const firstRoundKey = "first-round-date"
 const RoundTime = "12:00"
 
 // ---- set frequency per month -----
-const FerquencyPerMonthBlockId = "set-frequency-per-month"
+const FerquencyPerMonthBlockID = "set-frequency-per-month"
 const frequencyPerMonthText = "_*🕥 how many times per month do you wanna schedule lunches?*_"
 const frequencyPerMonyhPlaceholder = "pick frequency"
 
 // ---- set group size ----
-const GroupSizeBlockId = "set-group-size"
+const GroupSizeBlockID = "set-group-size"
 const groupSizeText = "_* 🙍👱🙍👱 How many people should be paired in one group?*_"

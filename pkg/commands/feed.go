@@ -3,7 +3,6 @@ package commands
 import (
 	"fmt"
 
-	"github.com/divan/num2words"
 	"github.com/nlopes/slack"
 	"github.com/omaressameldin/lunch-roulette/internal/db"
 	"github.com/omaressameldin/lunch-roulette/internal/utils"
@@ -34,8 +33,14 @@ func selectFoodChannel(channel string, rtm *slack.RTM) error {
 				slack.NewTextBlockObject("mrkdwn", selectChannelQuestion, false, false),
 			}...,
 		),
+		slack.NewContextBlock(
+			"",
+			[]slack.MixedElement{
+				slack.NewTextBlockObject("mrkdwn", selectChannelWarning, false, false),
+			}...,
+		),
 		slack.NewActionBlock(
-			SelectChannelBlockId,
+			SelectChannelBlockID,
 			slack.NewOptionsSelectBlockElement(
 				"channels_select",
 				slack.NewTextBlockObject("plain_text", selectChannelPlaceholder, false, false),
@@ -51,7 +56,7 @@ func PendingResponse() slack.Attachment {
 	return PendingMessage(addingToDatabase)
 }
 
-func FirstRoundDate() []slack.Block {
+func FirstRoundDate(channelID string) []slack.Block {
 	return []slack.Block{
 		slack.NewContextBlock(
 			"",
@@ -60,55 +65,30 @@ func FirstRoundDate() []slack.Block {
 			}...,
 		),
 		slack.NewActionBlock(
-			FirstRoundStartBlockId,
-			slack.NewDatePickerBlockElement(firstRoundKey),
+			FirstRoundStartBlockID,
+			slack.NewDatePickerBlockElement(channelID),
 			CancelButton(),
 		),
 	}
 }
 
-func FrequencyPerMonth() []slack.Block {
-	return numberSelect(1, 4, FerquencyPerMonthBlockId, frequencyPerMonthText)
+func FrequencyPerMonth(channelID string) []slack.Block {
+	return numberSelect(1, 4, FerquencyPerMonthBlockID, channelID, frequencyPerMonthText)
 }
 
-func GroupSize() []slack.Block {
-	return numberSelect(2, 6, GroupSizeBlockId, groupSizeText)
+func GroupSize(channelID string) []slack.Block {
+	return numberSelect(2, 6, GroupSizeBlockID, channelID, groupSizeText)
 }
 
-func numberSelect(min int, max int, blockId string, title string) []slack.Block {
-	elements := make([]slack.BlockElement, 0, max-min+1)
-	for i := min; i <= max; i++ {
-		elements = append(elements, slack.NewButtonBlockElement(
-			"",
-			fmt.Sprintf("%d", i),
-			slack.NewTextBlockObject("plain_text", num2words.Convert(i), false, false),
-		))
-	}
-	elements = append(elements, CancelButton())
-
-	return []slack.Block{
-		slack.NewContextBlock(
-			"",
-			[]slack.MixedElement{
-				slack.NewTextBlockObject("mrkdwn", title, false, false),
-			}...,
-		),
-		slack.NewActionBlock(
-			blockId,
-			elements...,
-		),
-	}
-}
-
-func DoneText(database *db.DB, bot *slacker.Slacker) (string, error) {
-	startDate, err := database.GetNextRoundDate()
-	channelID, err := database.GetBotChannel()
-	frequency, err := database.GetFrequencyPerMonth()
-	size, err := database.GetGroupSize()
+func DoneText(database *db.DB, channelID string, bot *slacker.Slacker) (string, error) {
+	startDate, err := database.GetNextRoundDate(channelID)
+	frequency, err := database.GetFrequencyPerMonth(channelID)
+	size, err := database.GetGroupSize(channelID)
 	if err != nil {
 		return "", err
 	}
-	channelInfo, err := bot.RTM().GetChannelInfo(*channelID)
+
+	channelInfo, err := bot.RTM().GetChannelInfo(channelID)
 	if err != nil {
 		return "", err
 	}
