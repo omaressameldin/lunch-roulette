@@ -21,19 +21,19 @@ func HandleActions(bot *bot.Bot) {
 			}
 			for _, block := range payload.ActionCallback.BlockActions {
 				switch block.BlockID {
-				case commands.SelectChannelBlockId:
+				case commands.SelectChannelBlockID:
 					{
 						selectChannel(bot.DB, payload.ResponseURL, w, block.SelectedChannel)
 					}
-				case commands.FirstRoundStartBlockId:
+				case commands.FirstRoundStartBlockID:
 					{
 						setFirstRoundDate(bot.DB, payload.ResponseURL, w, block.SelectedDate)
 					}
-				case commands.FerquencyPerMonthBlockId:
+				case commands.FerquencyPerMonthBlockID:
 					{
 						setFrequencyPerMonth(bot.DB, payload.ResponseURL, w, block.Value)
 					}
-				case commands.GroupSizeBlockId:
+				case commands.GroupSizeBlockID:
 					{
 						setGroupSize(bot.SlackBot, bot.DB, payload.ResponseURL, w, block.Value)
 					}

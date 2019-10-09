@@ -20,21 +20,20 @@ const feedDesc = "Pair group of people together for company paid lunch"
 
 // ---- select channel -----
 const selectChannelQuestion = "_*📰 Which channel do you wanna link the bot to?*_"
-const SelectChannelBlockId = "select-food-channel"
+const SelectChannelBlockID = "select-food-channel"
 const selectChannelPlaceholder = "pick a channel"
 const FoodChannelKey = "food-channel"
 
 // ---- set first round date -----
-const FirstRoundStartBlockId = "set-first-round-start"
+const FirstRoundStartBlockID = "set-first-round-start"
 const firstRoundStartText = "_*📅 When should the first round start?*_"
-const firstRoundKey = "first-round-date"
 const RoundTime = "12:00"
 
 // ---- set frequency per month -----
-const FerquencyPerMonthBlockId = "set-frequency-per-month"
+const FerquencyPerMonthBlockID = "set-frequency-per-month"
 const frequencyPerMonthText = "_*🕥 how many times per month do you wanna schedule lunches?*_"
 const frequencyPerMonyhPlaceholder = "pick frequency"
 
 // ---- set group size ----
-const GroupSizeBlockId = "set-group-size"
+const GroupSizeBlockID = "set-group-size"
 const groupSizeText = "_* 🙍👱🙍👱 How many people should be paired in one group?*_"

@@ -35,7 +35,7 @@ func selectFoodChannel(channel string, rtm *slack.RTM) error {
 			}...,
 		),
 		slack.NewActionBlock(
-			SelectChannelBlockId,
+			SelectChannelBlockID,
 			slack.NewOptionsSelectBlockElement(
 				"channels_select",
 				slack.NewTextBlockObject("plain_text", selectChannelPlaceholder, false, false),
@@ -60,8 +60,7 @@ func FirstRoundDate() []slack.Block {
 			}...,
 		),
 		slack.NewActionBlock(
-			FirstRoundStartBlockId,
-			slack.NewDatePickerBlockElement(firstRoundKey),
+			FirstRoundStartBlockID,
 			CancelButton(),
 		),
 	}

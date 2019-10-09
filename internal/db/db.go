@@ -39,13 +39,13 @@ func (d *DB) AddBotChannel(channelID string) error {
 	})
 }
 
-func (d *DB) AddNextRoundDate(channel string, t time.Time) error {
+func (d *DB) AddNextRoundDate(channelID string, t time.Time) error {
 	if t.Before(time.Now()) {
 		return fmt.Errorf("Next Round Date has to be in the future!")
 	}
 
 	err := d.database.Update(func(tx *bolt.Tx) error {
-		b, err := getScheduleBucket(channel, tx)
+		b, err := getScheduleBucket(channelID, tx)
 		if err != nil {
 			return err
 		}
@@ -59,10 +59,10 @@ func (d *DB) AddNextRoundDate(channel string, t time.Time) error {
 	return nil
 }
 
-func (d *DB) GetNextRoundDate(channel string) (*time.Time, error) {
+func (d *DB) GetNextRoundDate(channelID string) (*time.Time, error) {
 	var round []byte
 	err := d.database.View(func(tx *bolt.Tx) error {
-		b, err := getScheduleBucket(channel, tx)
+		b, err := getScheduleBucket(channelID, tx)
 		if err != nil {
 			return err
 		}
@@ -86,9 +86,9 @@ func (d *DB) GetNextRoundDate(channel string) (*time.Time, error) {
 	return &t, nil
 }
 
-func (d *DB) AddFrequencyPerMonth(channel string, frequency int) error {
+func (d *DB) AddFrequencyPerMonth(channelID string, frequency int) error {
 	err := d.database.Update(func(tx *bolt.Tx) error {
-		b, err := getScheduleBucket(channel, tx)
+		b, err := getScheduleBucket(channelID, tx)
 		if err != nil {
 			return err
 		}
@@ -102,10 +102,10 @@ func (d *DB) AddFrequencyPerMonth(channel string, frequency int) error {
 	return nil
 }
 
-func (d *DB) GetFrequencyPerMonth(channel string) (*int, error) {
+func (d *DB) GetFrequencyPerMonth(channelID string) (*int, error) {
 	var frequency []byte
 	err := d.database.View(func(tx *bolt.Tx) error {
-		b, err := getScheduleBucket(channel, tx)
+		b, err := getScheduleBucket(channelID, tx)
 		if err != nil {
 			return err
 		}
@@ -128,9 +128,9 @@ func (d *DB) GetFrequencyPerMonth(channel string) (*int, error) {
 	return &freqInt, nil
 }
 
-func (d *DB) AddGroupSize(channel string, groupSize int) error {
+func (d *DB) AddGroupSize(channelID string, groupSize int) error {
 	err := d.database.Update(func(tx *bolt.Tx) error {
-		b, err := getScheduleBucket(channel, tx)
+		b, err := getScheduleBucket(channelID, tx)
 		if err != nil {
 			return err
 		}
@@ -145,10 +145,10 @@ func (d *DB) AddGroupSize(channel string, groupSize int) error {
 	return nil
 }
 
-func (d *DB) GetGroupSize(channel string) (*int, error) {
+func (d *DB) GetGroupSize(channelID string) (*int, error) {
 	var size []byte
 	err := d.database.View(func(tx *bolt.Tx) error {
-		b, err := getScheduleBucket(channel, tx)
+		b, err := getScheduleBucket(channelID, tx)
 		if err != nil {
 			return err
 		}
@@ -171,8 +171,8 @@ func (d *DB) GetGroupSize(channel string) (*int, error) {
 	return &sizeInt, nil
 }
 
-func getScheduleBucket(channel string, tx *bolt.Tx) (*bolt.Bucket, error) {
-	bucketName := []byte(channel)
+func getScheduleBucket(channelID string, tx *bolt.Tx) (*bolt.Bucket, error) {
+	bucketName := []byte(channelID)
 	b := tx.Bucket(bucketName)
 	if b == nil {
 		return nil, bucketError
