@@ -1,6 +1,8 @@
 package db
 
 import (
+	"encoding/binary"
+	"errors"
 	"fmt"
 	"log"
 	"strconv"
@@ -39,12 +41,27 @@ func (d *DB) AddBotChannel(channelID string) error {
 	})
 }
 
-func (d *DB) AddNextRoundDate(channelID string, t time.Time) error {
-	if t.Before(time.Now()) {
-		return fmt.Errorf("Next Round Date has to be in the future!")
+func (d *DB) GetBotChannels() ([]string, error) {
+	var channels []string
+	err := d.database.View(func(tx *bolt.Tx) error {
+		return tx.ForEach(func(name []byte, _ *bolt.Bucket) error {
+			channels = append(channels, string(name))
+			return nil
+		})
+	})
+	if err != nil {
+		return nil, err
 	}
 
-	err := d.database.Update(func(tx *bolt.Tx) error {
+	return channels, nil
+}
+
+func (d *DB) AddNextRoundDate(channelID string, t time.Time) error {
+	// if t.Before(time.Now()) {
+	// 	return fmt.Errorf("Next Round Date has to be in the future!")
+	// }
+
+	return d.database.Update(func(tx *bolt.Tx) error {
 		b, err := getScheduleBucket(channelID, tx)
 		if err != nil {
 			return err
@@ -52,11 +69,6 @@ func (d *DB) AddNextRoundDate(channelID string, t time.Time) error {
 
 		return b.Put([]byte(keyNextRound), []byte(t.Format(timeLayout)))
 	})
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (d *DB) GetNextRoundDate(channelID string) (*time.Time, error) {
@@ -87,7 +99,11 @@ func (d *DB) GetNextRoundDate(channelID string) (*time.Time, error) {
 }
 
 func (d *DB) AddFrequencyPerMonth(channelID string, frequency int) error {
-	err := d.database.Update(func(tx *bolt.Tx) error {
+	if frequency < 1 || frequency > 30 {
+		return fmt.Errorf("Frequency has to be between 1 and 30! ")
+	}
+
+	return d.database.Update(func(tx *bolt.Tx) error {
 		b, err := getScheduleBucket(channelID, tx)
 		if err != nil {
 			return err
@@ -95,11 +111,6 @@ func (d *DB) AddFrequencyPerMonth(channelID string, frequency int) error {
 
 		return b.Put([]byte(keyFrequencyPerMonth), []byte(strconv.Itoa(frequency)))
 	})
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (d *DB) GetFrequencyPerMonth(channelID string) (*int, error) {
@@ -129,7 +140,11 @@ func (d *DB) GetFrequencyPerMonth(channelID string) (*int, error) {
 }
 
 func (d *DB) AddGroupSize(channelID string, groupSize int) error {
-	err := d.database.Update(func(tx *bolt.Tx) error {
+	if groupSize < 2 {
+		return fmt.Errorf("Group size can not be less than 2! ")
+	}
+
+	return d.database.Update(func(tx *bolt.Tx) error {
 		b, err := getScheduleBucket(channelID, tx)
 		if err != nil {
 			return err
@@ -137,12 +152,6 @@ func (d *DB) AddGroupSize(channelID string, groupSize int) error {
 
 		return b.Put([]byte(keyGroupSize), []byte(strconv.Itoa(groupSize)))
 	})
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (d *DB) GetGroupSize(channelID string) (*int, error) {
@@ -169,6 +178,64 @@ func (d *DB) GetGroupSize(channelID string) (*int, error) {
 		return nil, err
 	}
 	return &sizeInt, nil
+}
+
+func (d *DB) AddMembers(channelID string, members []string) error {
+	return d.database.Batch(func(tx *bolt.Tx) error {
+		b, err := getScheduleBucket(channelID, tx)
+		if err != nil {
+			return err
+		}
+
+		membersBucket, err := b.CreateBucketIfNotExists([]byte(keyMembers))
+		for _, member := range members {
+			id64, _ := membersBucket.NextSequence()
+			key := itob(int(id64))
+			b.Put(key, []byte(member))
+		}
+
+		return nil
+	})
+}
+
+func (d *DB) DeleteAllSelectedMembers(channelID string) error {
+	return d.database.Update(func(tx *bolt.Tx) error {
+		b, err := getScheduleBucket(channelID, tx)
+		if err != nil {
+			return err
+		}
+
+		return b.DeleteBucket([]byte(keyMembers))
+	})
+}
+
+func (d *DB) AllMembers(channelID string) ([]string, error) {
+	var members []string
+	err := d.database.View(func(tx *bolt.Tx) error {
+		b, err := getScheduleBucket(channelID, tx)
+		if err != nil {
+			return err
+		}
+		membersBucket := b.Bucket([]byte(keyMembers))
+		if membersBucket == nil {
+			return errors.New("Members bucket does not exist!")
+		}
+		c := membersBucket.Cursor()
+		for k, member := c.First(); k != nil; k, member = c.Next() {
+			members = append(members, string(member))
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return members, nil
+}
+
+func itob(v int) []byte {
+	b := make([]byte, 8)
+	binary.BigEndian.PutUint64(b, uint64(v))
+	return b
 }
 
 func getScheduleBucket(channelID string, tx *bolt.Tx) (*bolt.Bucket, error) {
