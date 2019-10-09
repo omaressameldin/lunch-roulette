@@ -26,7 +26,7 @@ func selectChannel(
 		return
 	}
 	sendReply(responseURL, w, Reply{
-		Blocks: commands.FirstRoundDate(),
+		Blocks: commands.FirstRoundDate(selectedChannel),
 	})
 }
 
@@ -34,6 +34,7 @@ func setFirstRoundDate(
 	database *db.DB,
 	responseURL string,
 	w http.ResponseWriter,
+	channelID string,
 	selectedDate string,
 ) {
 	nextRound, err := time.Parse(
@@ -45,13 +46,13 @@ func setFirstRoundDate(
 		return
 	}
 	sendPendingResponse(responseURL, w)
-	err = database.AddNextRoundDate(nextRound)
+	err = database.AddNextRoundDate(channelID, nextRound)
 	if err != nil {
 		sendCancelResponse(responseURL, w, err.Error())
 		return
 	}
 	sendReply(responseURL, w, Reply{
-		Blocks: commands.FrequencyPerMonth(),
+		Blocks: commands.FrequencyPerMonth(channelID),
 	})
 }
 
@@ -59,6 +60,7 @@ func setFrequencyPerMonth(
 	database *db.DB,
 	responseURL string,
 	w http.ResponseWriter,
+	channelID string,
 	selectedFrequency string,
 ) {
 	frequency, err := strconv.Atoi(selectedFrequency)
@@ -67,13 +69,13 @@ func setFrequencyPerMonth(
 		return
 	}
 	sendPendingResponse(responseURL, w)
-	err = database.AddFrequencyPerMonth(frequency)
+	err = database.AddFrequencyPerMonth(channelID, frequency)
 	if err != nil {
 		sendCancelResponse(responseURL, w, err.Error())
 		return
 	}
 	sendReply(responseURL, w, Reply{
-		Blocks: commands.GroupSize(),
+		Blocks: commands.GroupSize(channelID),
 	})
 }
 
@@ -82,20 +84,22 @@ func setGroupSize(
 	database *db.DB,
 	responseURL string,
 	w http.ResponseWriter,
-	selectedize string,
+	channelID string,
+	selectedSize string,
 ) {
-	frequency, err := strconv.Atoi(selectedize)
+	size, err := strconv.Atoi(selectedSize)
 	if err != nil {
 		sendCancelResponse(responseURL, w, err.Error())
 		return
 	}
 	sendPendingResponse(responseURL, w)
-	err = database.AddGroupSize(frequency)
+	err = database.AddGroupSize(channelID, size)
 	if err != nil {
 		sendCancelResponse(responseURL, w, err.Error())
 		return
 	}
-	successMessage, err := commands.DoneText(database, bot)
+
+	successMessage, err := commands.DoneText(database, channelID, bot)
 	if err != nil {
 		sendCancelResponse(responseURL, w, err.Error())
 		return

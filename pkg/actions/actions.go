@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/omaressameldin/lunch-roulette/internal/env"
 	"github.com/omaressameldin/lunch-roulette/pkg/bot"
@@ -27,15 +28,36 @@ func HandleActions(bot *bot.Bot) {
 					}
 				case commands.FirstRoundStartBlockID:
 					{
-						setFirstRoundDate(bot.DB, payload.ResponseURL, w, block.SelectedDate)
+						setFirstRoundDate(
+							bot.DB,
+							payload.ResponseURL,
+							w,
+							block.ActionID,
+							block.SelectedDate,
+						)
 					}
 				case commands.FerquencyPerMonthBlockID:
 					{
-						setFrequencyPerMonth(bot.DB, payload.ResponseURL, w, block.Value)
+						channelID := strings.Split(block.ActionID, commands.NumberActionSeparator)[0]
+						setFrequencyPerMonth(
+							bot.DB,
+							payload.ResponseURL,
+							w,
+							channelID,
+							block.Value,
+						)
 					}
 				case commands.GroupSizeBlockID:
 					{
-						setGroupSize(bot.SlackBot, bot.DB, payload.ResponseURL, w, block.Value)
+						channelID := strings.Split(block.ActionID, commands.NumberActionSeparator)[0]
+						setGroupSize(
+							bot.SlackBot,
+							bot.DB,
+							payload.ResponseURL,
+							w,
+							channelID,
+							block.Value,
+						)
 					}
 				}
 			}

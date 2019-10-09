@@ -3,7 +3,6 @@ package commands
 import (
 	"fmt"
 
-	"github.com/divan/num2words"
 	"github.com/nlopes/slack"
 	"github.com/omaressameldin/lunch-roulette/internal/db"
 	"github.com/omaressameldin/lunch-roulette/internal/utils"
@@ -51,7 +50,7 @@ func PendingResponse() slack.Attachment {
 	return PendingMessage(addingToDatabase)
 }
 
-func FirstRoundDate() []slack.Block {
+func FirstRoundDate(channelID string) []slack.Block {
 	return []slack.Block{
 		slack.NewContextBlock(
 			"",
@@ -61,24 +60,29 @@ func FirstRoundDate() []slack.Block {
 		),
 		slack.NewActionBlock(
 			FirstRoundStartBlockID,
+			slack.NewDatePickerBlockElement(channelID),
 			CancelButton(),
 		),
 	}
 }
 
-func FrequencyPerMonth() []slack.Block {
-	return numberSelect(1, 4, FerquencyPerMonthBlockId, frequencyPerMonthText)
+func FrequencyPerMonth(channelID string) []slack.Block {
+	return numberSelect(1, 4, FerquencyPerMonthBlockID, channelID, frequencyPerMonthText)
 }
 
-func GroupSize() []slack.Block {
-	return numberSelect(2, 6, GroupSizeBlockId, groupSizeText)
+func GroupSize(channelID string) []slack.Block {
+	return numberSelect(2, 6, GroupSizeBlockID, channelID, groupSizeText)
 }
 
-
+func DoneText(database *db.DB, channelID string, bot *slacker.Slacker) (string, error) {
+	startDate, err := database.GetNextRoundDate(channelID)
+	frequency, err := database.GetFrequencyPerMonth(channelID)
+	size, err := database.GetGroupSize(channelID)
 	if err != nil {
 		return "", err
 	}
-	channelInfo, err := bot.RTM().GetChannelInfo(*channelID)
+
+	channelInfo, err := bot.RTM().GetChannelInfo(channelID)
 	if err != nil {
 		return "", err
 	}
