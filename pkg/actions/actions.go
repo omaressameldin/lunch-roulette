@@ -22,6 +22,10 @@ func HandleActions(bot *bot.Bot) {
 			}
 			for _, block := range payload.ActionCallback.BlockActions {
 				switch block.BlockID {
+				case commands.SelectDeletedBlockID:
+					{
+						deleteChannel(bot.DB, payload.ResponseURL, w, block.SelectedChannel)
+					}
 				case commands.SelectChannelBlockID:
 					{
 						selectChannel(bot.DB, payload.ResponseURL, w, block.SelectedChannel)

@@ -64,6 +64,7 @@ func dateChangeMessage(channelID string) string {
 // delete command
 const deleteCmd = "delete"
 const deleteDesc = "deletes a schedule linked to a channel"
+const DeleteSuccess = "💣 channel is Successfully unlinked!"
 
 // ---- select channel ----
 const selectDeletedQuestion = "_*💣 Which channel do you wanna unlink?*_"
