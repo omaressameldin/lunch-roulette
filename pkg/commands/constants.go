@@ -60,3 +60,15 @@ func dateChangeMessage(channelID string) string {
 		channelID,
 	)
 }
+
+// delete command
+const deleteCmd = "delete"
+const deleteDesc = "deletes a schedule linked to a channel"
+const DeleteSuccess = "💣 channel is Successfully unlinked!"
+
+// ---- select channel ----
+const selectDeletedQuestion = "_*💣 Which channel do you wanna unlink?*_"
+const SelectDeletedBlockID = "select-deleted-channel"
+const selectDeletedPlaceholder = "pick a channel"
+const selectDeletedWarning = "_*⏰Warning:*_ `this will remove the schedule linked to that channel`"
+const deletedKey = "deleted-channel"

@@ -41,6 +41,12 @@ func (d *DB) AddBotChannel(channelID string) error {
 	})
 }
 
+func (d *DB) DeleteBotChannel(channelID string) error {
+	return d.database.Update(func(tx *bolt.Tx) error {
+		return tx.DeleteBucket([]byte(channelID))
+	})
+}
+
 func (d *DB) GetBotChannels() ([]string, error) {
 	var channels []string
 	err := d.database.View(func(tx *bolt.Tx) error {
