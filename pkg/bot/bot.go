@@ -31,6 +31,7 @@ func (b *Bot) StartListening() error {
 	commands.AddInitCmd(b.DB, b.SlackBot)
 	commands.AddFeedCmd(b.SlackBot)
 	commands.AddDeleteCmd(b.SlackBot)
+	commands.AddStatsCmd(b.DB, b.SlackBot)
 
 	log.Println("Listening...")
 	err := b.SlackBot.Listen(ctx)

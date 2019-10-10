@@ -36,7 +36,7 @@ const FoodChannelKey = "food-channel"
 // ---- set first round date -----
 const FirstRoundStartBlockID = "set-first-round-start"
 const firstRoundStartText = "_*📅 When should the first round start?*_"
-const RoundTime = "12:20"
+const RoundTime = "12:00"
 
 // ---- set frequency per month -----
 const FerquencyPerMonthBlockID = "set-frequency-per-month"
@@ -72,3 +72,9 @@ const SelectDeletedBlockID = "select-deleted-channel"
 const selectDeletedPlaceholder = "pick a channel"
 const selectDeletedWarning = "_*⏰Warning:*_ `this will remove the schedule linked to that channel`"
 const deletedKey = "deleted-channel"
+
+// stats command
+const statsError = "Can not show stats"
+const statsCmd = "stats"
+const statsDesc = "get stats of a all scheduled lunches"
+const noChannels = "*😕No Channels are linked!*"
