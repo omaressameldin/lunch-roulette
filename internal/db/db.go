@@ -57,9 +57,9 @@ func (d *DB) GetBotChannels() ([]string, error) {
 }
 
 func (d *DB) AddNextRoundDate(channelID string, t time.Time) error {
-	// if t.Before(time.Now()) {
-	// 	return fmt.Errorf("Next Round Date has to be in the future!")
-	// }
+	if t.Before(time.Now()) {
+		return fmt.Errorf("Next Round Date has to be in the future!")
+	}
 
 	return d.database.Update(func(tx *bolt.Tx) error {
 		b, err := getScheduleBucket(channelID, tx)
