@@ -31,7 +31,7 @@ const FoodChannelKey = "food-channel"
 // ---- set first round date -----
 const FirstRoundStartBlockID = "set-first-round-start"
 const firstRoundStartText = "_*📅 When should the first round start?*_"
-const RoundTime = "15:30"
+const RoundTime = "12:00"
 
 // ---- set frequency per month -----
 const FerquencyPerMonthBlockID = "set-frequency-per-month"
