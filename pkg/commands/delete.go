@@ -17,7 +17,7 @@ func deleteSchedule() *slacker.CommandDefinition {
 			channel := request.Event().Channel
 			rtm := response.RTM()
 
-			utils.ReplyWithError(selectScheduleForDeletion(channel, rtm), feedError, response)
+			utils.ReplyWithError(selectScheduleForDeletion(channel, rtm), deleteError, response)
 		},
 	}
 }
