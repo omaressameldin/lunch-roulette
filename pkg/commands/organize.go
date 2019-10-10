@@ -28,66 +28,111 @@ func organzieLunches(d *db.DB, bot *slacker.Slacker) {
 
 func OrganizeLunch(bot *slacker.Slacker, d *db.DB, channelID string) {
 	go func() {
+		quit := make(chan error, 1)
+		updateRound := make(chan error, 1)
+
 		for {
-			if !canSchedule(d, channelID) {
-				return
-			}
-			if err := waitForRound(d, channelID); err != nil {
-				log.Println(err)
-				return
-			}
-			selected, err := selectMembers(bot, d, channelID)
-			if err != nil {
+			if err := checkOrganizeReadiness(d, channelID); err != nil {
 				sendError(channelID, bot, err)
 			}
-			log.Println(selected)
-			mentionSelectedMembers(bot, channelID, selected)
+
+			go waitForRound(d, channelID, quit, updateRound)
+
+			select {
+			case err := <-updateRound:
+				{
+
+					if addingError := addNextRound(d, channelID); addingError != nil {
+						sendError(channelID, bot, addingError)
+						return
+					}
+
+					// if error is sent to channel, an update should happen but no setting
+					// should be done for this round
+					if err != nil {
+						log.Println(utils.OrganizeError(channelID, err))
+						continue
+					}
+
+					selected, selectingError := selectMembers(bot, d, channelID)
+					if selectingError != nil {
+						sendError(channelID, bot, selectingError)
+						return
+					}
+					mentionSelectedMembers(bot, channelID, selected)
+				}
+			case err := <-quit:
+				{
+					if err != nil {
+						sendError(channelID, bot, err)
+					}
+					close(updateRound)
+					close(quit)
+					return
+				}
+			}
 		}
 	}()
 }
 
-func canSchedule(d *db.DB, channelID string) bool {
-	freq, err := d.GetFrequencyPerMonth(channelID)
-	if err != nil || freq == nil {
-		return false
+func checkOrganizeReadiness(d *db.DB, channelID string) error {
+	if freq, err := d.GetFrequencyPerMonth(channelID); err != nil || freq == nil {
+		return utils.OrganizeError(channelID, err)
 	}
 
-	nextRound, err := d.GetNextRoundDate(channelID)
-	if err != nil || nextRound == nil {
-		return false
+	if nextRound, err := d.GetNextRoundDate(channelID); err != nil || nextRound == nil {
+		return utils.OrganizeError(channelID, err)
 	}
 
-	groupSize, err := d.GetGroupSize(channelID)
-	if err != nil || groupSize == nil {
-		return false
+	if groupSize, err := d.GetGroupSize(channelID); err != nil || groupSize == nil {
+		return utils.OrganizeError(channelID, err)
 	}
 
-	return true
+	return nil
 }
 
-func waitForRound(d *db.DB, channelID string) error {
-	freq, err := d.GetFrequencyPerMonth(channelID)
-	if err != nil {
-		return err
-	}
-
+func waitForRound(
+	d *db.DB, channelID string,
+	quit chan<- error,
+	updateRound chan<- error,
+) {
 	nextRound, err := d.GetNextRoundDate(channelID)
 	if err != nil {
-		return err
+		quit <- err //quit if can't get roundDate
 	}
 
-	// add freq weeks to next round
-	err = utils.SleepTill(*nextRound)
+	log.Printf("organize lunch for %s, on %s", channelID, nextRound)
+
+	if err = utils.SleepTill(*nextRound); err != nil {
+		updateRound <- fmt.Errorf("error sleeping: %s", err.Error())
+		return
+	}
+
+	// quit if dates changed
+	currentRound, err := d.GetNextRoundDate(channelID)
+	if err != nil {
+		quit <- err
+	}
+	if !currentRound.Equal(*nextRound) {
+		quit <- errors.New("something changed and is being handled by another goroutine")
+	}
+
+	updateRound <- nil
+}
+
+func addNextRound(d *db.DB, channelID string) error {
 	currentRound, err := d.GetNextRoundDate(channelID)
 	if err != nil {
 		return err
 	}
-	// quit if dates changed
-	if !currentRound.Equal(*nextRound) {
-		return errors.New("something changed and should have been handled by another goroutine")
+
+	freq, err := d.GetFrequencyPerMonth(channelID)
+	if err != nil {
+		return err
 	}
-	newRound := nextRound.AddDate(0, 0, 7*(*freq))
-	d.AddNextRoundDate(channelID, newRound)
+
+	nextRound := currentRound.AddDate(0, 0, 30/(*freq)+1)
+	err = d.AddNextRoundDate(channelID, nextRound)
 	if err != nil {
 		return err
 	}
