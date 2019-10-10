@@ -2,7 +2,6 @@ package db
 
 import (
 	"encoding/binary"
-	"errors"
 	"fmt"
 	"log"
 	"strconv"
@@ -187,17 +186,27 @@ func (d *DB) GetGroupSize(channelID string) (*int, error) {
 }
 
 func (d *DB) AddMembers(channelID string, members []string) error {
-	return d.database.Batch(func(tx *bolt.Tx) error {
+	return d.database.Update(func(tx *bolt.Tx) error {
 		b, err := getScheduleBucket(channelID, tx)
 		if err != nil {
 			return err
 		}
 
 		membersBucket, err := b.CreateBucketIfNotExists([]byte(keyMembers))
+		if err != nil {
+			return err
+		}
+
 		for _, member := range members {
-			id64, _ := membersBucket.NextSequence()
+			id64, err := membersBucket.NextSequence()
+			if err != nil {
+				return err
+			}
 			key := itob(int(id64))
-			b.Put(key, []byte(member))
+
+			if err = membersBucket.Put(key, []byte(member)); err != nil {
+				return err
+			}
 		}
 
 		return nil
@@ -224,7 +233,7 @@ func (d *DB) AllMembers(channelID string) ([]string, error) {
 		}
 		membersBucket := b.Bucket([]byte(keyMembers))
 		if membersBucket == nil {
-			return errors.New("Members bucket does not exist!")
+			return nil
 		}
 		c := membersBucket.Cursor()
 		for k, member := c.First(); k != nil; k, member = c.Next() {
@@ -235,6 +244,7 @@ func (d *DB) AllMembers(channelID string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return members, nil
 }
 
