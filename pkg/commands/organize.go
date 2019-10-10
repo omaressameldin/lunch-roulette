@@ -2,7 +2,6 @@ package commands
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"log"
 	"math/rand"
@@ -101,6 +100,8 @@ func waitForRound(
 		quit <- err //quit if can't get roundDate
 	}
 
+	log.Println(organizeLogMessage(channelID, nextRound))
+
 	if err = utils.SleepTill(*nextRound); err != nil {
 		updateRound <- fmt.Errorf("error sleeping: %s", err.Error())
 		return
@@ -112,7 +113,8 @@ func waitForRound(
 		quit <- err
 	}
 	if !currentRound.Equal(*nextRound) {
-		quit <- errors.New("something changed and is being handled by another goroutine")
+		log.Printf(dateChangeMessage(channelID))
+		quit <- nil
 	}
 
 	updateRound <- nil
