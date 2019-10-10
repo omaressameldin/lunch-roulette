@@ -101,8 +101,6 @@ func waitForRound(
 		quit <- err //quit if can't get roundDate
 	}
 
-	log.Printf("organize lunch for %s, on %s", channelID, nextRound)
-
 	if err = utils.SleepTill(*nextRound); err != nil {
 		updateRound <- fmt.Errorf("error sleeping: %s", err.Error())
 		return
