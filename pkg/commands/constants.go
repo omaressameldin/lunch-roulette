@@ -1,5 +1,10 @@
 package commands
 
+import (
+	"fmt"
+	"time"
+)
+
 // colors
 const colorPending = "#f9a41b"
 const colorDanger = "#dc3545"
@@ -11,7 +16,7 @@ const CancelValue = "cancel-request"
 
 // messages
 const addingToDatabase = "⏳ Your response is being saved..."
-const timeLayout = "Mon Jan 2 15:04"
+const timeLayout = "Mon Jan 2 15:04 MST"
 
 // number select
 const NumberActionSeparator = "____"
@@ -31,7 +36,7 @@ const FoodChannelKey = "food-channel"
 // ---- set first round date -----
 const FirstRoundStartBlockID = "set-first-round-start"
 const firstRoundStartText = "_*📅 When should the first round start?*_"
-const RoundTime = "12:00"
+const RoundTime = "12:20"
 
 // ---- set frequency per month -----
 const FerquencyPerMonthBlockID = "set-frequency-per-month"
@@ -41,3 +46,17 @@ const frequencyPerMonyhPlaceholder = "pick frequency"
 // ---- set group size ----
 const GroupSizeBlockID = "set-group-size"
 const groupSizeText = "_* 🙍👱🙍👱 How many people should be paired in one group?*_"
+
+// organize
+const membersSelected = "*congratulations🥳* You have been selected for a *free* lunch for this month!"
+
+func organizeLogMessage(channelID string, nextRound *time.Time) string {
+	return fmt.Sprintf("organize lunch for %s, on %s", channelID, nextRound)
+}
+
+func dateChangeMessage(channelID string) string {
+	return fmt.Sprintf(
+		"something changed for %s and is being handled by another goroutine",
+		channelID,
+	)
+}

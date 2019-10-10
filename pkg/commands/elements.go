@@ -5,6 +5,7 @@ import (
 
 	"github.com/divan/num2words"
 	"github.com/nlopes/slack"
+	"github.com/shomali11/slacker"
 )
 
 func CancelButton() slack.BlockElement {
@@ -78,4 +79,10 @@ func numberSelect(
 			elements...,
 		),
 	}
+}
+
+func sendError(channelID string, bot *slacker.Slacker, err error) {
+	bot.RTM().PostMessage(channelID, slack.MsgOptionAttachments(
+		DangerMessage(err.Error()),
+	))
 }

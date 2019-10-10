@@ -98,7 +98,7 @@ func setGroupSize(
 		sendCancelResponse(responseURL, w, err.Error())
 		return
 	}
-
+	commands.OrganizeLunch(bot, database, channelID)
 	successMessage, err := commands.DoneText(database, channelID, bot)
 	if err != nil {
 		sendCancelResponse(responseURL, w, err.Error())
