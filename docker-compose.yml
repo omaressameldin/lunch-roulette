@@ -1,0 +1,22 @@
+version: '3.2'
+services:
+  ngrok:
+    image: wernight/ngrok
+    network_mode: "host"
+    stdin_open: true
+    tty: true
+    environment:
+      NGROK_PORT: ${ACTIONS_PORT}
+  lunch-roulette:
+    build:
+      context: .
+      args:
+        - BUILD_FILE=${BUILD_FILE}
+        - APP_SRC=${APP_SRC}
+        - PORT=${ACTIONS_PORT}
+    ports:
+      - "${ACTIONS_PORT}:${ACTIONS_PORT}"
+    volumes:
+      - type: bind
+        target: /${DB_NAME}
+        source: ./${DB_NAME}
