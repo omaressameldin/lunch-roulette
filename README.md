@@ -15,7 +15,7 @@ A slack bot to randomize lunch buddies
 
 
 ## Development
-- make sure you have **docker version: 18.x+** installed
+- make sure you have **docker version: 19.x+** installed
 - run `docker-compose up --build` to launch service
 - add the link found in [localhost:4040](http://localhost:4040) to [https://api.slack.com/apps/<app_id>/interactive-messages?](https://api.slack.com/apps/<app_id>/interactive-messages?) interactive messages request url field found here -> [https://api.slack.com/apps/<app_id>/interactive-messages?](https://api.slack.com/apps/<app_id>/interactive-messages?)
 
