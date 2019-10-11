@@ -6,7 +6,7 @@ A slack bot to randomize lunch buddies
 
 ## What you need before deploying / developing
 - Create a new slack app in your slack workspace [link](https://api.slack.com/apps)
-- Add a `.env` file following the example in the [.env_sample](.env_sample) *Note:* slack token is *Bot User OAuth Access Token* found in [https://api.slack.com/apps/<app_id>/oauth?]
+- Add a `.env` file following the example in the [.env_sample](.env_sample) *Note:* slack token is *Bot User OAuth Access Token* found in [https://api.slack.com/apps/<app_id>/oauth?](https://api.slack.com/apps/<app_id>/oauth?)
 
 # Deployment
 - Deploy the service wherever you want using the dockerfile included
