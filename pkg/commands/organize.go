@@ -63,7 +63,7 @@ func OrganizeLunch(bot *slacker.Slacker, d *db.DB, channelID string) {
 			case err := <-quit:
 				{
 					if err != nil {
-						sendError(channelID, bot, err)
+						log.Println(err)
 					}
 					close(updateRound)
 					close(quit)
@@ -111,10 +111,12 @@ func waitForRound(
 	currentRound, err := d.GetNextRoundDate(channelID)
 	if err != nil {
 		quit <- err
+		return
 	}
 	if !currentRound.Equal(*nextRound) {
 		log.Printf(dateChangeMessage(channelID))
 		quit <- nil
+		return
 	}
 
 	updateRound <- nil
