@@ -21,3 +21,6 @@ services:
       - type: bind
         target: /database
         source: ./database
+      - type: bind
+        target: /.env
+        source: .env
