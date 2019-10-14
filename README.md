@@ -1,4 +1,4 @@
-# ![](./avatar.png | width=100) Lunch Roulette
+# ![](./avatar.png?s=100) Lunch Roulette
 A slack bot to randomize lunch buddies
 
 ## What this is
