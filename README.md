@@ -1,4 +1,4 @@
-# Lunch Roulette
+# ![avatar](./avatar.png){:height="36px" width="36px"} Lunch Roulette
 A slack bot to randomize lunch buddies
 
 ## What this is
