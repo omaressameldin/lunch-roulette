@@ -5,19 +5,16 @@ A slack bot to randomize lunch buddies
 - A slack bot using GO to schedule random lunches between members every period of time
 
 ## How to use
-- **There are commands available in the app:**
-  - help:
-    - for showing useful info abouit available commands
-    ![help](./screenshots/help.gif)
-  - feed:
-    - to start randomizing members of a channel for lunches
-    ![feed](./screenshots/feed.gif)
-  - stats:
-    - to show information about all available schedules
-    ![stats](./screenshots/stats.gif)
-  - delete:
-    - to delete a schedule
-    ![delete](./screenshots/delete.gif)
+**There are commands available in the app:**
+help | feed
+--- | ---
+![help](./screenshots/help.gif) | ![feed](./screenshots/feed.gif)
+
+stats | delete
+--- | ---
+![stats](./screenshots/stats.gif) | ![delete](./screenshots/delete.gif)
+
+
 
 ## What you need before deploying / developing
 - Create a new slack app in your slack workspace [link](https://api.slack.com/apps)
