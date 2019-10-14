@@ -6,6 +6,7 @@ A slack bot to randomize lunch buddies
 
 ## How to use
 **There are commands available in the app:**
+
 help | feed
 --- | ---
 ![help](./screenshots/help.gif) | ![feed](./screenshots/feed.gif)
