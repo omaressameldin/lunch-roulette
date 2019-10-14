@@ -5,7 +5,7 @@ A slack bot to randomize lunch buddies
 - A slack bot using GO to schedule random lunches between members every period of time
 
 ## How to use
-**There are commands available in the app:**
+**There are 4 commands available in the app:**
 
 help | feed
 --- | ---
