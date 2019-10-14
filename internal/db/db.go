@@ -19,7 +19,11 @@ func OpenDB() *DB {
 	dbName := env.GetDBName()
 
 	var err error
-	db, err := bolt.Open(dbName, 0600, nil)
+	db, err := bolt.Open(
+		fmt.Sprintf("%s/%s.db", dbDirectory, dbName),
+		0600,
+		nil,
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
