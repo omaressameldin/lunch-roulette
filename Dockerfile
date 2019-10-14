@@ -1,7 +1,10 @@
-FROM golang:1.12.4-alpine
+ARG APP_SRC=/usr/src/app
+ARG BUILD_FILE=lunch-roulette
 
+FROM golang:1.12.4-alpine
 ARG BUILD_FILE
 ARG APP_SRC
+
 WORKDIR $APP_SRC
 
 COPY go.mod .
@@ -13,15 +16,13 @@ RUN apk add git &&\
 
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go test ./... &&\
-    CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o ${BUILD_FILE} .
+    CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o $BUILD_FILE .
 
 
 FROM bash:4.3.48
-
 ARG BUILD_FILE
-ARG APP_SRC
-ARG PORT
 ENV BUILD_FILE $BUILD_FILE
+ARG APP_SRC
 
 COPY --from=0 /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=0 ${APP_SRC}/${BUILD_FILE} $BUILD_FILE
@@ -29,7 +30,5 @@ COPY --from=0 ${APP_SRC}/${BUILD_FILE} $BUILD_FILE
 RUN addgroup -S appuser && adduser -S appuser -G appuser -u 1000 &&\
     chown -R appuser $BUILD_FILE
 USER appuser
-
-EXPOSE $PORT
 
 CMD ./$BUILD_FILE

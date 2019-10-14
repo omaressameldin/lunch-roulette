@@ -10,11 +10,9 @@ services:
   lunch-roulette:
     build:
       context: .
-      args:
-        - BUILD_FILE=${BUILD_FILE}
-        - APP_SRC=${APP_SRC}
-        - PORT=${ACTIONS_PORT}
-        - DB_DIRECTORY=database
+    environment:
+      - PORT=${ACTIONS_PORT}
+      - DB_DIRECTORY=database
     ports:
       - "${ACTIONS_PORT}:${ACTIONS_PORT}"
     volumes:
