@@ -49,3 +49,32 @@ func selectScheduleForExclusion(channel string, rtm *slack.RTM) error {
 
 	return nil
 }
+
+func SelectExcludedMember(channel string) []slack.Block {
+	// Because static_select doesnt show when used
+	// users_select was used and database checks
+	// if user is actually in channel
+	return []slack.Block{
+		slack.NewContextBlock(
+			"",
+			[]slack.MixedElement{
+				slack.NewTextBlockObject("mrkdwn", memberExcludeQuestion, false, false),
+			}...,
+		),
+		slack.NewContextBlock(
+			"",
+			[]slack.MixedElement{
+				slack.NewTextBlockObject("mrkdwn", excludeWarning, false, false),
+			}...,
+		),
+		slack.NewActionBlock(
+			ExcludeMemberBlockID,
+			slack.NewOptionsSelectBlockElement(
+				"users_select",
+				slack.NewTextBlockObject("plain_text", excludeMemberPlaceholder, false, false),
+				channel,
+			),
+			CancelButton(),
+		),
+	}
+}

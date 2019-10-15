@@ -92,3 +92,8 @@ const excludeQuestion = "_*💣 Which schedule do you wanna exclude from?*_"
 const ExcludeChannelBlockID = "select-exclude-channel"
 const excludeChannelPlaceholder = "pick a channel"
 const excludedChannelKey = "exclude-channel"
+
+// ---- select Member ----
+const memberExcludeQuestion = "_*💣 Which Member do you wanna exclude from channel?*_"
+const ExcludeMemberBlockID = "select-exclude-member"
+const excludeMemberPlaceholder = "pick a member"
