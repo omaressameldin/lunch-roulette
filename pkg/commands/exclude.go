@@ -12,7 +12,8 @@ func AddExcludeCmd(bot *slacker.Slacker) {
 
 func exclude() *slacker.CommandDefinition {
 	return &slacker.CommandDefinition{
-		Description: excludeDesc,
+		Description:       excludeDesc,
+		AuthorizationFunc: authFunction,
 		Handler: func(request slacker.Request, response slacker.ResponseWriter) {
 			channel := request.Event().Channel
 			rtm := response.RTM()
