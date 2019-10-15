@@ -26,6 +26,21 @@ func HandleActions(bot *bot.Bot) {
 					{
 						deleteChannel(bot.DB, payload.ResponseURL, w, block.SelectedChannel)
 					}
+				case commands.ExcludeChannelBlockID:
+					{
+						excludeChannel(bot.DB, payload.ResponseURL, w, block.SelectedChannel)
+					}
+				case commands.ExcludeMemberBlockID:
+					{
+						excludeMember(
+							bot.DB,
+							bot.SlackBot,
+							payload.ResponseURL,
+							w,
+							block.SelectedUser,
+							block.ActionID,
+						)
+					}
 				case commands.SelectChannelBlockID:
 					{
 						selectChannel(bot.DB, payload.ResponseURL, w, block.SelectedChannel)
