@@ -44,6 +44,14 @@ func (d *DB) AddBotChannel(channelID string) error {
 	})
 }
 
+func (d *DB) IsChannelLinked(channelID string) error {
+	return d.database.View(func(tx *bolt.Tx) error {
+		_, err := getScheduleBucket(channelID, tx)
+
+		return err
+	})
+}
+
 func (d *DB) DeleteBotChannel(channelID string) error {
 	return d.database.Update(func(tx *bolt.Tx) error {
 		return tx.DeleteBucket([]byte(channelID))
