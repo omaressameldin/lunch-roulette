@@ -23,7 +23,7 @@ stats | delete
 
 ### Deployment
 - Deploy the service wherever you want using the dockerfile included
-- Make sure you have a proxy pointing to your `ACTIONS_PORT` in [.env](env_sample) file
+- Make sure you have a proxy pointing to your `PORT` in [.env](env_sample) file
 - Add the url pointing to the proxy to interactive messages request url field found here -> [https://api.slack.com/apps/<app_id>/interactive-messages?](https://api.slack.com/apps/<app_id>/interactive-messages?)
 
 
