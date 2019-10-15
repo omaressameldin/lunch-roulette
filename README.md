@@ -28,7 +28,7 @@ stats | delete
 
 ### Heroku
 - you can also deploy using heroku by following [this guide](https://devcenter.heroku.com/articles/getting-started-with-go#deploy-the-app)
-- dont forget to add the `SLACK_TOKEN` and `DB_NAME` to env vars
+- dont forget to add the `SLACK_TOKEN`, `DB_NAME`, and `AUTH_USERS` to env vars
 - **NOTE:** Heroku adds its own port to env so you should **not** do it
 
 ### Development
