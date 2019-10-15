@@ -2,6 +2,7 @@ package env
 
 import (
 	"log"
+	"strings"
 
 	"github.com/omaressameldin/lunch-roulette/internal/utils"
 )
@@ -36,4 +37,13 @@ func GetToken() string {
 	}
 
 	return token
+}
+
+func GetAuthUsers() []string {
+	authUsers, err := utils.GetEnv(authUsersKey)
+	if err != nil {
+		return []string{}
+	}
+
+	return strings.Split(authUsers, ",")
 }

@@ -5,6 +5,8 @@ import (
 
 	"github.com/divan/num2words"
 	"github.com/nlopes/slack"
+	"github.com/omaressameldin/lunch-roulette/internal/env"
+	"github.com/omaressameldin/lunch-roulette/internal/utils"
 	"github.com/shomali11/slacker"
 )
 
@@ -85,4 +87,13 @@ func sendError(channelID string, bot *slacker.Slacker, err error) {
 	bot.RTM().PostMessage(channelID, slack.MsgOptionAttachments(
 		DangerMessage(err.Error()),
 	))
+}
+
+func authFunction(request slacker.Request) bool {
+	authUsersIDs := env.GetAuthUsers()
+	if len(authUsersIDs) == 0 {
+		return true
+	}
+
+	return utils.Contains(authUsersIDs, request.Event().User)
 }

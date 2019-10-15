@@ -15,7 +15,8 @@ func AddFeedCmd(bot *slacker.Slacker) {
 
 func feed() *slacker.CommandDefinition {
 	return &slacker.CommandDefinition{
-		Description: feedDesc,
+		Description:       feedDesc,
+		AuthorizationFunc: authFunction,
 		Handler: func(request slacker.Request, response slacker.ResponseWriter) {
 			channel := request.Event().Channel
 			rtm := response.RTM()
