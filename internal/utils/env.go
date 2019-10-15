@@ -8,17 +8,8 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func loadEnv() error {
-	if err := godotenv.Load(); err != nil {
-		return fmt.Errorf("Error loading .env file")
-	}
-	return nil
-}
-
 func GetEnv(envVar string) (string, error) {
-	if err := loadEnv(); err != nil {
-		return "", err
-	}
+	godotenv.Load()
 
 	v := strings.Trim(os.Getenv(envVar), " ")
 	if len(v) == 0 {

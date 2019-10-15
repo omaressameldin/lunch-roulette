@@ -23,9 +23,13 @@ stats | delete
 
 ### Deployment
 - Deploy the service wherever you want using the dockerfile included
-- Make sure you have a proxy pointing to your `ACTIONS_PORT` in [.env](env_sample) file
+- Make sure you have a proxy pointing to your `PORT` in [.env](env_sample) file
 - Add the url pointing to the proxy to interactive messages request url field found here -> [https://api.slack.com/apps/<app_id>/interactive-messages?](https://api.slack.com/apps/<app_id>/interactive-messages?)
 
+### Heroku
+- you can also deploy using heroku by following [this guide](https://devcenter.heroku.com/articles/getting-started-with-go#deploy-the-app)
+- dont forget to add the `SLACK_TOKEN` and `DB_NAME` to env vars
+- **NOTE:** Heroku adds its own port to env so you should **not** do it
 
 ### Development
 - make sure you have **docker version: 19.x+** installed

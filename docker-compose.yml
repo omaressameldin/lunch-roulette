@@ -6,17 +6,15 @@ services:
     stdin_open: true
     tty: true
     environment:
-      NGROK_PORT: ${ACTIONS_PORT}
+      NGROK_PORT: ${PORT}
   lunch-roulette:
     build:
       context: .
-      args:
-        - BUILD_FILE=${BUILD_FILE}
-        - APP_SRC=${APP_SRC}
-        - PORT=${ACTIONS_PORT}
-        - DB_DIRECTORY=database
+    environment:
+      - PORT=${PORT}
+      - DB_DIRECTORY=database
     ports:
-      - "${ACTIONS_PORT}:${ACTIONS_PORT}"
+      - "${PORT}:${PORT}"
     volumes:
       - type: bind
         target: /database
