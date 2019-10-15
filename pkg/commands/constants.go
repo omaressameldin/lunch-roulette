@@ -79,3 +79,16 @@ const statsError = "Can not show stats"
 const statsCmd = "stats"
 const statsDesc = "get stats of a all scheduled lunches"
 const noChannels = "*😕No Channels are linked!*"
+
+// exclude command
+const excludeError = "Can not exclude members"
+const excludeCmd = "exclude"
+const excludeDesc = "excludes a member for one full round"
+const ExcludeSuccess = "😑 Member is Successfully Excluded for this round!"
+const excludeWarning = "_*⏰Warning:*_ `this will only exclude a member for a full round. If you want to remove a member permanently you should remove him/her from the channel!`"
+
+// ---- select channel ----
+const excludeQuestion = "_*💣 Which schedule do you wanna exclude from?*_"
+const ExcludeChannelBlockID = "select-exclude-channel"
+const excludeChannelPlaceholder = "pick a channel"
+const excludedChannelKey = "exclude-channel"
