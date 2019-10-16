@@ -143,7 +143,7 @@ func addNextRound(d *db.DB, channelID string) error {
 }
 
 func selectMembers(bot *slacker.Slacker, d *db.DB, channelID string) ([]string, error) {
-	freq, err := d.GetFrequencyPerMonth(channelID)
+	groupSize, err := d.GetGroupSize(channelID)
 	if err != nil {
 		return nil, err
 	}
@@ -152,9 +152,12 @@ func selectMembers(bot *slacker.Slacker, d *db.DB, channelID string) ([]string, 
 		return nil, err
 	}
 	members := info.Members
-	selected := make([]string, 0, *freq)
+	log.Println("members", members)
+	selectionLimit := int(math.Min(float64(len(members)), float64(*groupSize)))
+	selected := make([]string, 0, *groupSize)
 	alreadySelectedMembers, err := d.AllMembers(channelID)
 	remainingMembers := utils.Difference(members, alreadySelectedMembers)
+	for len(selected) < selectionLimit {
 
 	for len(selected) < *freq && len(remainingMembers) > 0 {
 		rand.Seed(time.Now().Unix())
