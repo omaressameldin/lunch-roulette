@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"math"
 	"math/rand"
 	"time"
 
@@ -143,7 +144,7 @@ func addNextRound(d *db.DB, channelID string) error {
 }
 
 func selectMembers(bot *slacker.Slacker, d *db.DB, channelID string) ([]string, error) {
-	freq, err := d.GetFrequencyPerMonth(channelID)
+	groupSize, err := d.GetGroupSize(channelID)
 	if err != nil {
 		return nil, err
 	}
@@ -152,21 +153,22 @@ func selectMembers(bot *slacker.Slacker, d *db.DB, channelID string) ([]string, 
 		return nil, err
 	}
 	members := info.Members
-	selected := make([]string, 0, *freq)
+	log.Println("members", members)
+	selectionLimit := int(math.Min(float64(len(members)), float64(*groupSize)))
+	selected := make([]string, 0, *groupSize)
 	alreadySelectedMembers, err := d.AllMembers(channelID)
 	remainingMembers := utils.Difference(members, alreadySelectedMembers)
-
-	for len(selected) < *freq && len(remainingMembers) > 0 {
-		rand.Seed(time.Now().Unix())
-		selectedIndex := rand.Intn(len(remainingMembers))
-		selected = append(selected, remainingMembers[selectedIndex])
-		remainingMembers = utils.Remove(remainingMembers, selectedIndex)
-
+	for len(selected) < selectionLimit {
 		// use already selected members if no remaining members remain
 		if len(remainingMembers) == 0 {
 			remainingMembers = alreadySelectedMembers
 			d.DeleteAllSelectedMembers(channelID)
 		}
+
+		rand.Seed(time.Now().Unix())
+		selectedIndex := rand.Intn(len(remainingMembers))
+		selected = append(selected, remainingMembers[selectedIndex])
+		remainingMembers = utils.Remove(remainingMembers, selectedIndex)
 	}
 
 	err = d.AddMembers(channelID, selected)
