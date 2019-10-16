@@ -13,6 +13,10 @@ import (
 
 func HandleActions(bot *bot.Bot) {
 	port := env.GetActionPort()
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Nothing to do here"))
+	})
+
 	http.HandleFunc(route, func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
 			payload, _ := unmarshalPayload(r)
