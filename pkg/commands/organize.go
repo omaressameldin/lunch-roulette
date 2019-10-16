@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"math"
 	"math/rand"
 	"time"
 
@@ -158,18 +159,16 @@ func selectMembers(bot *slacker.Slacker, d *db.DB, channelID string) ([]string, 
 	alreadySelectedMembers, err := d.AllMembers(channelID)
 	remainingMembers := utils.Difference(members, alreadySelectedMembers)
 	for len(selected) < selectionLimit {
-
-	for len(selected) < *freq && len(remainingMembers) > 0 {
-		rand.Seed(time.Now().Unix())
-		selectedIndex := rand.Intn(len(remainingMembers))
-		selected = append(selected, remainingMembers[selectedIndex])
-		remainingMembers = utils.Remove(remainingMembers, selectedIndex)
-
 		// use already selected members if no remaining members remain
 		if len(remainingMembers) == 0 {
 			remainingMembers = alreadySelectedMembers
 			d.DeleteAllSelectedMembers(channelID)
 		}
+
+		rand.Seed(time.Now().Unix())
+		selectedIndex := rand.Intn(len(remainingMembers))
+		selected = append(selected, remainingMembers[selectedIndex])
+		remainingMembers = utils.Remove(remainingMembers, selectedIndex)
 	}
 
 	err = d.AddMembers(channelID, selected)
