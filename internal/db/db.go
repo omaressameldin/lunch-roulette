@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/boltdb/bolt"
-	"github.com/omaressameldin/lunch-roulette/internal/env"
+	"github.com/omaressameldin/lunch-roulette/internal/drive"
 )
 
 type DB struct {
@@ -16,11 +16,12 @@ type DB struct {
 }
 
 func OpenDB() *DB {
-	dbName := env.GetDBName()
+	drive.GetDBFile()
+	defer drive.UpdateDB()
 
 	var err error
 	db, err := bolt.Open(
-		fmt.Sprintf("%s/%s.db", dbDirectory, dbName),
+		drive.DBFileName(),
 		0600,
 		nil,
 	)
@@ -38,6 +39,8 @@ func (d *DB) CloseDB() {
 }
 
 func (d *DB) AddBotChannel(channelID string) error {
+	defer drive.UpdateDB()
+
 	return d.database.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists([]byte(channelID))
 		return err
@@ -53,6 +56,8 @@ func (d *DB) IsChannelLinked(channelID string) error {
 }
 
 func (d *DB) DeleteBotChannel(channelID string) error {
+	defer drive.UpdateDB()
+
 	return d.database.Update(func(tx *bolt.Tx) error {
 		return tx.DeleteBucket([]byte(channelID))
 	})
@@ -74,6 +79,8 @@ func (d *DB) GetBotChannels() ([]string, error) {
 }
 
 func (d *DB) AddNextRoundDate(channelID string, t time.Time) error {
+	defer drive.UpdateDB()
+
 	if t.Before(time.Now()) {
 		return fmt.Errorf("Next Round Date has to be in the future!")
 	}
@@ -116,6 +123,8 @@ func (d *DB) GetNextRoundDate(channelID string) (*time.Time, error) {
 }
 
 func (d *DB) AddFrequencyPerMonth(channelID string, frequency int) error {
+	defer drive.UpdateDB()
+
 	if frequency < 1 || frequency > 30 {
 		return fmt.Errorf("Frequency has to be between 1 and 30! ")
 	}
@@ -157,6 +166,8 @@ func (d *DB) GetFrequencyPerMonth(channelID string) (*int, error) {
 }
 
 func (d *DB) AddGroupSize(channelID string, groupSize int) error {
+	defer drive.UpdateDB()
+
 	if groupSize < 2 {
 		return fmt.Errorf("Group size can not be less than 2! ")
 	}
@@ -198,6 +209,8 @@ func (d *DB) GetGroupSize(channelID string) (*int, error) {
 }
 
 func (d *DB) AddMembers(channelID string, members []string) error {
+	defer drive.UpdateDB()
+
 	return d.database.Update(func(tx *bolt.Tx) error {
 		b, err := getScheduleBucket(channelID, tx)
 		if err != nil {
@@ -226,6 +239,8 @@ func (d *DB) AddMembers(channelID string, members []string) error {
 }
 
 func (d *DB) DeleteAllSelectedMembers(channelID string) error {
+	defer drive.UpdateDB()
+
 	return d.database.Update(func(tx *bolt.Tx) error {
 		b, err := getScheduleBucket(channelID, tx)
 		if err != nil {
