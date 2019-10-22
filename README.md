@@ -31,6 +31,13 @@ stats | delete
 - dont forget to add the `SLACK_TOKEN`, `DB_NAME`, and `AUTH_USERS` to env vars
 - **NOTE:** Heroku adds its own port to env so you should **not** do it
 
+### Google drive support
+- The bot supports having the db file saved to google drive, in case you cant save it on server.
+- To do that you need to create a project on google cloud
+- Then enable google drive api
+- Create a service accoutn and get `credentials.json` content and add them as env variable as you can see here [.env](.env_sample)
+- You are good to go!
+
 ### Development
 - make sure you have **docker version: 19.x+** installed
 - run `docker-compose up --build` to launch service
@@ -44,3 +51,4 @@ stats | delete
 - [nlopes/slack](https://github.com/nlopes/slack)
 - Docker
 - Docker-compose
+- Google Drive
