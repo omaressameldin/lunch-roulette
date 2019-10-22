@@ -2,9 +2,6 @@ package db
 
 import "errors"
 
-//database
-const dbDirectory = "database"
-
 //buckets
 var bucketError = errors.New("This channel is not linked to any schedules!")
 
