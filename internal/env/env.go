@@ -21,6 +21,21 @@ func GetActionPort() string {
 	return port
 }
 
+func DoesHaveCredentials() bool {
+	_, err := utils.GetEnv(driveCredentialsKey)
+
+	return err == nil
+}
+
+func GetDriveCredentials() string {
+	driveCredentials, err := utils.GetEnv(driveCredentialsKey)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return driveCredentials
+}
+
 func GetDBName() string {
 	dbName, err := utils.GetEnv(dbNameKey)
 	if err != nil {
