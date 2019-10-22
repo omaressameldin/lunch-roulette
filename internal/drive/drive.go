@@ -1,7 +1,6 @@
 package drive
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -56,17 +55,12 @@ func GetDBFile() {
 	if f == nil {
 		return
 	}
-	b, err := json.Marshal(f)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println(string(b))
 
-	h, err := srv.Files.Get(f.Id).Download()
+	content, err := srv.Files.Get(f.Id).Download()
 	if err != nil {
 		log.Fatal(err)
 	}
-	body, err := ioutil.ReadAll(h.Body)
+	body, err := ioutil.ReadAll(content.Body)
 	if err != nil {
 		log.Fatalf("An error occurred: %v\n", err)
 	}
