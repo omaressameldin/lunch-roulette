@@ -33,7 +33,8 @@ func OrganizeLunch(bot *slacker.Slacker, d *db.DB, channelID string) {
 
 		for {
 			if err := checkOrganizeReadiness(d, channelID); err != nil {
-				sendError(channelID, bot, err)
+				log.Println(err)
+				return
 			}
 
 			go waitForRound(d, channelID, quit, updateRound)
@@ -76,15 +77,24 @@ func OrganizeLunch(bot *slacker.Slacker, d *db.DB, channelID string) {
 }
 
 func checkOrganizeReadiness(d *db.DB, channelID string) error {
-	if freq, err := d.GetFrequencyPerMonth(channelID); err != nil || freq == nil {
+	if freq, err := d.GetFrequencyPerMonth(channelID); freq == nil {
+		if err == nil {
+			err = fmt.Errorf("freq can't be empty")
+		}
 		return utils.OrganizeError(channelID, err)
 	}
 
-	if nextRound, err := d.GetNextRoundDate(channelID); err != nil || nextRound == nil {
+	if nextRound, err := d.GetNextRoundDate(channelID); nextRound == nil {
+		if err == nil {
+			err = fmt.Errorf("nextRound can't be empty")
+		}
 		return utils.OrganizeError(channelID, err)
 	}
 
-	if groupSize, err := d.GetGroupSize(channelID); err != nil || groupSize == nil {
+	if groupSize, err := d.GetGroupSize(channelID); groupSize == nil {
+		if err == nil {
+			err = fmt.Errorf("groupSize can't be empty")
+		}
 		return utils.OrganizeError(channelID, err)
 	}
 
