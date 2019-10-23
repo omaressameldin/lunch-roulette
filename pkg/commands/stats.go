@@ -125,7 +125,11 @@ func showFreq(freq int) string {
 }
 
 func showNextRoundDate(nextRound *time.Time) string {
-	return fmt.Sprintf("*📆Next Round Date:*\n %s", nextRound.Format(timeLayout))
+	formattedTime := "___"
+	if nextRound != nil {
+		formattedTime = nextRound.Format(timeLayout)
+	}
+	return fmt.Sprintf("*📆Next Round Date:*\n %s", formattedTime)
 }
 
 func showGroupSize(groupSize int) string {
