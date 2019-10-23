@@ -82,9 +82,9 @@ func getStats(d *db.DB, channel string, rtm *slack.RTM) error {
 		message = append(message,
 			createMessage(
 				channelInfo.Name,
-				*freq,
+				freq,
 				nextRound,
-				*groupSize,
+				groupSize,
 				memberNames,
 			),
 			slack.NewDividerBlock(),
@@ -99,9 +99,9 @@ func getStats(d *db.DB, channel string, rtm *slack.RTM) error {
 
 func createMessage(
 	channelName string,
-	freq int,
+	freq *int,
 	nextRoundDate *time.Time,
-	groupSize int,
+	groupSize *int,
 	memberNames []string,
 ) slack.Block {
 	return slack.NewSectionBlock(
@@ -120,16 +120,28 @@ func showChannel(channelName string) string {
 	return fmt.Sprintf("*Lunch Info for channel:* %s", channelName)
 }
 
-func showFreq(freq int) string {
-	return fmt.Sprintf("*🕥Frequency Per Month:* %d", freq)
+func showFreq(freq *int) string {
+	freqValue := "---"
+	if freq != nil {
+		freqValue = fmt.Sprintf("%d", *freq)
+	}
+	return fmt.Sprintf("*🕥Frequency Per Month:* %s", freqValue)
 }
 
 func showNextRoundDate(nextRound *time.Time) string {
-	return fmt.Sprintf("*📆Next Round Date:*\n %s", nextRound.Format(timeLayout))
+	formattedTime := "___"
+	if nextRound != nil {
+		formattedTime = nextRound.Format(timeLayout)
+	}
+	return fmt.Sprintf("*📆Next Round Date:*\n %s", formattedTime)
 }
 
-func showGroupSize(groupSize int) string {
-	return fmt.Sprintf("*🙍👱🙍👱Group Size:* %d", groupSize)
+func showGroupSize(groupSize *int) string {
+	groupSizeValue := "---"
+	if groupSize != nil {
+		groupSizeValue = fmt.Sprintf("%d", *groupSize)
+	}
+	return fmt.Sprintf("*🙍👱🙍👱Group Size:* %s", groupSizeValue)
 }
 
 func showMembers(memberNames []string) string {
