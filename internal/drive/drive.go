@@ -22,6 +22,7 @@ func UpdateDB() {
 	}
 
 	fileName := DBFileName()
+	parents := env.GetDBFileParent()
 	srv := serviceAccount()
 	var file *os.File
 	file, err := os.Open(fileName)
@@ -33,7 +34,7 @@ func UpdateDB() {
 	// delete file if exists since update is not working
 	defer deleteFile(srv, getFile(srv, fileName))
 
-	f := &drive.File{Name: fileName, Parents: []string{"1D9XEaynnsMR1N2Hwx9tHduBINoMWWEaU"}, Capabilities: &drive.FileCapabilities{
+	f := &drive.File{Name: fileName, Parents: parents, Capabilities: &drive.FileCapabilities{
 		CanDownload: true,
 		CanDelete:   true,
 	}}
