@@ -45,6 +45,14 @@ func GetDBName() string {
 	return dbName
 }
 
+func GetDBFileParent() []string {
+	parents, err := utils.GetEnv(dbFileParentKey)
+	if err != nil {
+		return []string{}
+	}
+	return strings.Split(parents, ",")
+}
+
 func GetToken() string {
 	token, err := utils.GetEnv(tokenKey)
 	if err != nil {
