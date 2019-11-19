@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS lunches  (
-  channel_id varchar(20) primary key NOT NULL,
-  groupSize int,
-  frequencyPerMonth int
+  channel_id varchar(20) PRIMARY KEY NOT NULL,
+  group_size int,
+  frequency_per_month int,
+  next_round_date timestamp
 );

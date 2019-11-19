@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS lunch_members  (
-  channelID varchar(20) NOT NULL,
-  memberID varchar(20) NOT NULL,
-  PRIMARY KEY (channelID, memberID)
+  channel_id varchar(20) NOT NULL REFERENCES lunches(channel_id) ON DELETE CASCADE,
+  member_id varchar(20) NOT NULL,
+  PRIMARY KEY (channel_id, member_id)
 );
