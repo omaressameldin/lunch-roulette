@@ -11,12 +11,11 @@ import (
 )
 
 func excludeChannel(
-	database *db.DB,
 	responseURL string,
 	w http.ResponseWriter,
 	selectedChannel string,
 ) {
-	if err := database.IsChannelLinked(selectedChannel); err != nil {
+	if err := db.IsChannelLinked(selectedChannel); err != nil {
 		sendCancelResponse(responseURL, w, err.Error())
 		return
 	}
@@ -27,7 +26,6 @@ func excludeChannel(
 }
 
 func excludeMember(
-	database *db.DB,
 	bot *slacker.Slacker,
 	responseURL string,
 	w http.ResponseWriter,
@@ -45,7 +43,7 @@ func excludeMember(
 		return
 	}
 
-	if err := database.AddMembers(channelID, []string{selectedMember}); err != nil {
+	if err := db.AddMembers(channelID, []string{selectedMember}); err != nil {
 		sendCancelResponse(responseURL, w, err.Error())
 	}
 

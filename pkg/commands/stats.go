@@ -11,29 +11,29 @@ import (
 	"github.com/shomali11/slacker"
 )
 
-func AddStatsCmd(d *db.DB, bot *slacker.Slacker) {
-	bot.Command(statsCmd, stats(d))
+func AddStatsCmd(bot *slacker.Slacker) {
+	bot.Command(statsCmd, stats())
 }
 
-func stats(d *db.DB) *slacker.CommandDefinition {
+func stats() *slacker.CommandDefinition {
 	return &slacker.CommandDefinition{
 		Description: statsDesc,
 		Handler: func(request slacker.Request, response slacker.ResponseWriter) {
 			channel := request.Event().Channel
 			rtm := response.RTM()
 
-			utils.ReplyWithError(getStats(d, channel, rtm), statsError, response)
+			utils.ReplyWithError(getStats(channel, rtm), statsError, response)
 		},
 	}
 }
 
-func getStats(d *db.DB, channel string, rtm *slack.RTM) error {
-	channels, err := d.GetBotChannels()
+func getStats(channel string, rtm *slack.RTM) error {
+	lunches, err := db.GetLunchChannels()
 	if err != nil {
 		return err
 	}
 
-	if len(channels) == 0 {
+	if len(lunches) == 0 {
 		rtm.PostMessage(channel, slack.MsgOptionBlocks(
 			slack.NewContextBlock("", slack.NewTextBlockObject(
 				"mrkdwn",
@@ -44,29 +44,18 @@ func getStats(d *db.DB, channel string, rtm *slack.RTM) error {
 		))
 	}
 
-	message := make([]slack.Block, 0, len(channels))
-	for _, channelID := range channels {
-		freq, err := d.GetFrequencyPerMonth(channelID)
+	message := make([]slack.Block, 0, len(lunches))
+	for _, lunch := range lunches {
+		freq := lunch.FrequencyPerMonth
+		nextRound := lunch.NextRoundDate
+		groupSize := lunch.GroupSize
+
+		channelInfo, err := rtm.GetChannelInfo(lunch.ChannelID)
 		if err != nil {
 			return err
 		}
 
-		nextRound, err := d.GetNextRoundDate(channelID)
-		if err != nil {
-			return err
-		}
-
-		groupSize, err := d.GetGroupSize(channelID)
-		if err != nil {
-			return err
-		}
-
-		channelInfo, err := rtm.GetChannelInfo(channelID)
-		if err != nil {
-			return err
-		}
-
-		members, err := d.AllMembers(channelID)
+		members, err := db.AllMembers(lunch.ChannelID)
 		if err != nil {
 			return err
 		}
@@ -99,9 +88,9 @@ func getStats(d *db.DB, channel string, rtm *slack.RTM) error {
 
 func createMessage(
 	channelName string,
-	freq *int,
+	freq int,
 	nextRoundDate *time.Time,
-	groupSize *int,
+	groupSize int,
 	memberNames []string,
 ) slack.Block {
 	return slack.NewSectionBlock(
@@ -120,12 +109,8 @@ func showChannel(channelName string) string {
 	return fmt.Sprintf("*Lunch Info for channel:* %s", channelName)
 }
 
-func showFreq(freq *int) string {
-	freqValue := "---"
-	if freq != nil {
-		freqValue = fmt.Sprintf("%d", *freq)
-	}
-	return fmt.Sprintf("*🕥Frequency Per Month:* %s", freqValue)
+func showFreq(freq int) string {
+	return fmt.Sprintf("*🕥Frequency Per Month:* %d", freq)
 }
 
 func showNextRoundDate(nextRound *time.Time) string {
@@ -136,12 +121,9 @@ func showNextRoundDate(nextRound *time.Time) string {
 	return fmt.Sprintf("*📆Next Round Date:*\n %s", formattedTime)
 }
 
-func showGroupSize(groupSize *int) string {
-	groupSizeValue := "---"
-	if groupSize != nil {
-		groupSizeValue = fmt.Sprintf("%d", *groupSize)
-	}
-	return fmt.Sprintf("*🙍👱🙍👱Group Size:* %s", groupSizeValue)
+func showGroupSize(groupSize int) string {
+
+	return fmt.Sprintf("*🙍👱🙍👱Group Size:* %d", groupSize)
 }
 
 func showMembers(memberNames []string) string {

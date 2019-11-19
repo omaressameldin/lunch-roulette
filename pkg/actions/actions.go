@@ -28,16 +28,15 @@ func HandleActions(bot *bot.Bot) {
 				switch block.BlockID {
 				case commands.SelectDeletedBlockID:
 					{
-						deleteChannel(bot.DB, payload.ResponseURL, w, block.SelectedChannel)
+						deleteChannel(payload.ResponseURL, w, block.SelectedChannel)
 					}
 				case commands.ExcludeChannelBlockID:
 					{
-						excludeChannel(bot.DB, payload.ResponseURL, w, block.SelectedChannel)
+						excludeChannel(payload.ResponseURL, w, block.SelectedChannel)
 					}
 				case commands.ExcludeMemberBlockID:
 					{
 						excludeMember(
-							bot.DB,
 							bot.SlackBot,
 							payload.ResponseURL,
 							w,
@@ -47,12 +46,11 @@ func HandleActions(bot *bot.Bot) {
 					}
 				case commands.SelectChannelBlockID:
 					{
-						selectChannel(bot.DB, payload.ResponseURL, w, block.SelectedChannel)
+						selectChannel(payload.ResponseURL, w, block.SelectedChannel)
 					}
 				case commands.FirstRoundStartBlockID:
 					{
 						setFirstRoundDate(
-							bot.DB,
 							payload.ResponseURL,
 							w,
 							block.ActionID,
@@ -63,7 +61,6 @@ func HandleActions(bot *bot.Bot) {
 					{
 						channelID := strings.Split(block.ActionID, commands.NumberActionSeparator)[0]
 						setFrequencyPerMonth(
-							bot.DB,
 							payload.ResponseURL,
 							w,
 							channelID,
@@ -75,7 +72,6 @@ func HandleActions(bot *bot.Bot) {
 						channelID := strings.Split(block.ActionID, commands.NumberActionSeparator)[0]
 						setGroupSize(
 							bot.SlackBot,
-							bot.DB,
 							payload.ResponseURL,
 							w,
 							channelID,

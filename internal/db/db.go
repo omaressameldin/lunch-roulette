@@ -1,292 +1,180 @@
 package db
 
 import (
-	"encoding/binary"
-	"fmt"
 	"log"
-	"strconv"
 	"time"
 
-	"github.com/boltdb/bolt"
-	"github.com/omaressameldin/lunch-roulette/internal/drive"
+	"github.com/go-pg/pg/v9"
+	"github.com/go-pg/pg/v9/orm"
+	"github.com/omaressameldin/lunch-roulette/internal/env"
 )
 
-type DB struct {
-	database *bolt.DB
+type Lunch struct {
+	ChannelID         string     `pg:"channel_id,pk"`
+	GroupSize         int        `pg:"group_size"`
+	FrequencyPerMonth int        `pg:"frequency_per_month"`
+	NextRoundDate     *time.Time `pg:"next_round_date"`
 }
 
-func OpenDB() *DB {
-	drive.GetDBFile()
-	defer drive.UpdateDB()
+type LunchMember struct {
+	ChannelID string `pg:"channel_id"`
+	MemberID  string `pg:"member_id"`
+}
 
-	var err error
-	db, err := bolt.Open(
-		drive.DBFileName(),
-		0600,
-		nil,
-	)
+func openDB() *pg.DB {
+	url := env.GetDatabaseUrl()
+	options, err := pg.ParseURL(url)
 	if err != nil {
 		log.Fatal(err)
 	}
+	return pg.Connect(options)
+}
 
-	return &DB{
-		database: db,
+func AddLunchChannel(channelID string) error {
+	db := openDB()
+	defer db.Close()
+
+	return db.Insert(&Lunch{
+		ChannelID: channelID,
+	})
+}
+
+func IsChannelLinked(channelID string) error {
+	db := openDB()
+	defer db.Close()
+
+	return db.Select(&Lunch{
+		ChannelID: channelID,
+	})
+}
+
+func DeleteLunchChannel(channelID string) error {
+	db := openDB()
+	defer db.Close()
+
+	return db.Delete(&Lunch{
+		ChannelID: channelID,
+	})
+}
+
+func GetLunchChannels() ([]Lunch, error) {
+	db := openDB()
+	defer db.Close()
+
+	var lunches []Lunch
+	err := db.Model(&lunches).Select()
+	if err != nil {
+		return nil, err
 	}
+	return lunches, nil
 }
 
-func (d *DB) CloseDB() {
-	d.database.Close()
-}
-
-func (d *DB) AddBotChannel(channelID string) error {
-	defer drive.UpdateDB()
-
-	return d.database.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte(channelID))
+func AddNextRoundDate(channelID string, t time.Time) error {
+	db := openDB()
+	defer db.Close()
+	lunch, err := GetLunchInfo(channelID)
+	if err != nil {
 		return err
-	})
+	}
+
+	lunch.NextRoundDate = &t
+	return db.Update(lunch)
 }
 
-func (d *DB) IsChannelLinked(channelID string) error {
-	return d.database.View(func(tx *bolt.Tx) error {
-		_, err := getScheduleBucket(channelID, tx)
+func AddFrequencyPerMonth(channelID string, frequency int) error {
+	db := openDB()
+	defer db.Close()
 
+	lunch, err := GetLunchInfo(channelID)
+	if err != nil {
 		return err
-	})
+	}
+	lunch.FrequencyPerMonth = frequency
+	return db.Update(lunch)
 }
 
-func (d *DB) DeleteBotChannel(channelID string) error {
-	defer drive.UpdateDB()
-
-	return d.database.Update(func(tx *bolt.Tx) error {
-		return tx.DeleteBucket([]byte(channelID))
-	})
+func AddGroupSize(channelID string, groupSize int) error {
+	db := openDB()
+	defer db.Close()
+	lunch, err := GetLunchInfo(channelID)
+	if err != nil {
+		return err
+	}
+	lunch.GroupSize = groupSize
+	return db.Update(lunch)
 }
 
-func (d *DB) GetBotChannels() ([]string, error) {
-	var channels []string
-	err := d.database.View(func(tx *bolt.Tx) error {
-		return tx.ForEach(func(name []byte, _ *bolt.Bucket) error {
-			channels = append(channels, string(name))
-			return nil
+func GetLunchInfo(channelID string) (*Lunch, error) {
+	db := openDB()
+	defer db.Close()
+
+	lunch := &Lunch{
+		ChannelID: channelID,
+	}
+	err := db.Select(lunch)
+	if err != nil {
+		return nil, err
+	}
+
+	return lunch, err
+}
+
+func AddMembers(channelID string, members []string) error {
+	db := openDB()
+	defer db.Close()
+
+	transacton, err := db.Begin()
+	if err != nil {
+		return err
+	}
+	for _, member := range members {
+		err = db.Insert(&LunchMember{
+			ChannelID: channelID,
+			MemberID:  member,
 		})
-	})
+		if err != nil {
+			return err
+		}
+	}
+	err = transacton.Commit()
+	if err != nil {
+		return err
+	}
+
+	return transacton.Close()
+}
+
+func DeleteAllSelectedMembers(channelID string) error {
+	db := openDB()
+	defer db.Close()
+	filter := func(q *orm.Query) (*orm.Query, error) {
+		q = q.Where("channel_id = ?", channelID)
+		return q, nil
+	}
+	var members []LunchMember
+	_, err := db.Model(&members).Apply(filter).Delete()
+
+	return err
+}
+
+func AllMembers(channelID string) ([]string, error) {
+	db := openDB()
+	defer db.Close()
+
+	var members []LunchMember
+	var memberIDs []string
+
+	filter := func(q *orm.Query) (*orm.Query, error) {
+		q = q.Where("channel_id = ?", channelID)
+		return q, nil
+	}
+	err := db.Model(&members).Apply(filter).Select()
 	if err != nil {
 		return nil, err
 	}
-
-	return channels, nil
-}
-
-func (d *DB) AddNextRoundDate(channelID string, t time.Time) error {
-	defer drive.UpdateDB()
-
-	if t.Before(time.Now()) {
-		return fmt.Errorf("Next Round Date has to be in the future!")
+	for _, member := range members {
+		memberIDs = append(memberIDs, member.MemberID)
 	}
 
-	return d.database.Update(func(tx *bolt.Tx) error {
-		b, err := getScheduleBucket(channelID, tx)
-		if err != nil {
-			return err
-		}
-
-		return b.Put([]byte(keyNextRound), []byte(t.Format(timeLayout)))
-	})
-}
-
-func (d *DB) GetNextRoundDate(channelID string) (*time.Time, error) {
-	var round []byte
-	err := d.database.View(func(tx *bolt.Tx) error {
-		b, err := getScheduleBucket(channelID, tx)
-		if err != nil {
-			return err
-		}
-
-		round = b.Get([]byte(keyNextRound))
-		return nil
-	})
-
-	if err != nil {
-		return nil, err
-	}
-	if string(round) == "" {
-		return nil, nil
-	}
-
-	t, err := time.Parse(timeLayout, string(round))
-	if err != nil {
-		return nil, err
-	}
-
-	return &t, nil
-}
-
-func (d *DB) AddFrequencyPerMonth(channelID string, frequency int) error {
-	defer drive.UpdateDB()
-
-	if frequency < 1 || frequency > 30 {
-		return fmt.Errorf("Frequency has to be between 1 and 30! ")
-	}
-
-	return d.database.Update(func(tx *bolt.Tx) error {
-		b, err := getScheduleBucket(channelID, tx)
-		if err != nil {
-			return err
-		}
-
-		return b.Put([]byte(keyFrequencyPerMonth), []byte(strconv.Itoa(frequency)))
-	})
-}
-
-func (d *DB) GetFrequencyPerMonth(channelID string) (*int, error) {
-	var frequency []byte
-	err := d.database.View(func(tx *bolt.Tx) error {
-		b, err := getScheduleBucket(channelID, tx)
-		if err != nil {
-			return err
-		}
-
-		frequency = b.Get([]byte(keyFrequencyPerMonth))
-		return nil
-	})
-
-	if err != nil {
-		return nil, err
-	}
-	if string(frequency) == "" {
-		return nil, nil
-	}
-
-	freqInt, err := strconv.Atoi(string(frequency))
-	if err != nil {
-		return nil, err
-	}
-	return &freqInt, nil
-}
-
-func (d *DB) AddGroupSize(channelID string, groupSize int) error {
-	defer drive.UpdateDB()
-
-	if groupSize < 2 {
-		return fmt.Errorf("Group size can not be less than 2! ")
-	}
-
-	return d.database.Update(func(tx *bolt.Tx) error {
-		b, err := getScheduleBucket(channelID, tx)
-		if err != nil {
-			return err
-		}
-
-		return b.Put([]byte(keyGroupSize), []byte(strconv.Itoa(groupSize)))
-	})
-}
-
-func (d *DB) GetGroupSize(channelID string) (*int, error) {
-	var size []byte
-	err := d.database.View(func(tx *bolt.Tx) error {
-		b, err := getScheduleBucket(channelID, tx)
-		if err != nil {
-			return err
-		}
-		size = b.Get([]byte(keyGroupSize))
-
-		return nil
-	})
-
-	if err != nil {
-		return nil, err
-	}
-	if string(size) == "" {
-		return nil, nil
-	}
-
-	sizeInt, err := strconv.Atoi(string(size))
-	if err != nil {
-		return nil, err
-	}
-	return &sizeInt, nil
-}
-
-func (d *DB) AddMembers(channelID string, members []string) error {
-	defer drive.UpdateDB()
-
-	return d.database.Update(func(tx *bolt.Tx) error {
-		b, err := getScheduleBucket(channelID, tx)
-		if err != nil {
-			return err
-		}
-
-		membersBucket, err := b.CreateBucketIfNotExists([]byte(keyMembers))
-		if err != nil {
-			return err
-		}
-
-		for _, member := range members {
-			id64, err := membersBucket.NextSequence()
-			if err != nil {
-				return err
-			}
-			key := itob(int(id64))
-
-			if err = membersBucket.Put(key, []byte(member)); err != nil {
-				return err
-			}
-		}
-
-		return nil
-	})
-}
-
-func (d *DB) DeleteAllSelectedMembers(channelID string) error {
-	defer drive.UpdateDB()
-
-	return d.database.Update(func(tx *bolt.Tx) error {
-		b, err := getScheduleBucket(channelID, tx)
-		if err != nil {
-			return err
-		}
-
-		return b.DeleteBucket([]byte(keyMembers))
-	})
-}
-
-func (d *DB) AllMembers(channelID string) ([]string, error) {
-	var members []string
-	err := d.database.View(func(tx *bolt.Tx) error {
-		b, err := getScheduleBucket(channelID, tx)
-		if err != nil {
-			return err
-		}
-		membersBucket := b.Bucket([]byte(keyMembers))
-		if membersBucket == nil {
-			return nil
-		}
-		c := membersBucket.Cursor()
-		for k, member := c.First(); k != nil; k, member = c.Next() {
-			members = append(members, string(member))
-		}
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return members, nil
-}
-
-func itob(v int) []byte {
-	b := make([]byte, 8)
-	binary.BigEndian.PutUint64(b, uint64(v))
-	return b
-}
-
-func getScheduleBucket(channelID string, tx *bolt.Tx) (*bolt.Bucket, error) {
-	bucketName := []byte(channelID)
-	b := tx.Bucket(bucketName)
-	if b == nil {
-		return nil, bucketError
-	}
-
-	return b, nil
+	return memberIDs, nil
 }

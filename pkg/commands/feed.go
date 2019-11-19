@@ -81,10 +81,8 @@ func GroupSize(channelID string) []slack.Block {
 	return numberSelect(2, 6, GroupSizeBlockID, channelID, groupSizeText)
 }
 
-func DoneText(database *db.DB, channelID string, bot *slacker.Slacker) (string, error) {
-	startDate, err := database.GetNextRoundDate(channelID)
-	frequency, err := database.GetFrequencyPerMonth(channelID)
-	size, err := database.GetGroupSize(channelID)
+func DoneText(channelID string, bot *slacker.Slacker) (string, error) {
+	lunchInfo, err := db.GetLunchInfo(channelID)
 	if err != nil {
 		return "", err
 	}
@@ -96,9 +94,9 @@ func DoneText(database *db.DB, channelID string, bot *slacker.Slacker) (string, 
 
 	return fmt.Sprintf(
 		"🍔 Everything is Done! starting *%s*, *%d* members will be paired *%d* times a month for lunch. Stats will be posted on *%s*",
-		startDate.Format(timeLayout),
-		*size,
-		*frequency,
+		lunchInfo.NextRoundDate.Format(timeLayout),
+		lunchInfo.GroupSize,
+		lunchInfo.FrequencyPerMonth,
 		channelInfo.Name,
 	), nil
 }
