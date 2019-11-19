@@ -32,14 +32,11 @@ exclude |
 ### Heroku
 - You can also deploy using heroku by following [this guide](https://devcenter.heroku.com/articles/getting-started-with-go#deploy-the-app)
 - dont forget to add the `SLACK_TOKEN`, `DB_NAME`, and `AUTH_USERS` to env vars
-- **NOTE:** Heroku adds its own port to env so you should **not** do it
+- **NOTE:** Heroku adds its own `port` and `DATABASE_URL` to env so you should **not** do it
 
-### Google Drive Support
-- The bot supports having the db file saved to google drive, in case you cant save it on server.
-- To do that you need to create a project on google cloud
-- Then enable google drive api
-- Create a service accoutn and get `credentials.json` content and add them as env variable as you can see here [.env](.env_sample)
-- You are good to go!
+### Postgres support
+- simply provide a `DATABASE_URL` env vaiable for teh database and run teh migrations
+- To run the migrations use https://github.com/golang-migrate/migrate
 
 ### Development
 - Make sure you have **docker version: 19.x+** installed
