@@ -70,3 +70,12 @@ func GetAuthUsers() []string {
 
 	return strings.Split(authUsers, ",")
 }
+
+func GetDatabaseUrl() string {
+	databaseUrl, err := utils.GetEnv(databaseUrlKey)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return databaseUrl
+}
