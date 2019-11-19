@@ -9,7 +9,7 @@ import (
 
 func ValidateEnvKeys() {
 	GetActionPort()
-	GetDBName()
+	GetDatabaseUrl()
 }
 
 func GetActionPort() string {
@@ -36,23 +36,6 @@ func GetDriveCredentials() string {
 	return driveCredentials
 }
 
-func GetDBName() string {
-	dbName, err := utils.GetEnv(dbNameKey)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return dbName
-}
-
-func GetDBFileParent() []string {
-	parents, err := utils.GetEnv(dbFileParentKey)
-	if err != nil {
-		return []string{}
-	}
-	return strings.Split(parents, ",")
-}
-
 func GetToken() string {
 	token, err := utils.GetEnv(tokenKey)
 	if err != nil {
@@ -69,4 +52,13 @@ func GetAuthUsers() []string {
 	}
 
 	return strings.Split(authUsers, ",")
+}
+
+func GetDatabaseUrl() string {
+	databaseUrl, err := utils.GetEnv(databaseUrlKey)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return databaseUrl
 }

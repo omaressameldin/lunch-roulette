@@ -5,6 +5,8 @@ go 1.12
 require (
 	github.com/boltdb/bolt v1.3.1
 	github.com/divan/num2words v0.0.0-20170904212200-57dba452f942
+	github.com/go-pg/pg/v9 v9.0.1
+	github.com/golang-migrate/migrate v3.5.4+incompatible // indirect
 	github.com/joho/godotenv v1.3.0
 	github.com/nlopes/slack v0.6.0
 	github.com/omaressameldin/water-bot v0.0.0-20190930071800-14a9d09e0296

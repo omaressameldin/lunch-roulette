@@ -9,13 +9,12 @@ import (
 )
 
 func deleteChannel(
-	database *db.DB,
 	responseURL string,
 	w http.ResponseWriter,
 	selectedChannel string,
 ) {
 	sendPendingResponse(responseURL, w)
-	err := database.DeleteBotChannel(selectedChannel)
+	err := db.DeleteLunchChannel(selectedChannel)
 	if err != nil {
 		sendCancelResponse(responseURL, w, err.Error())
 		return

@@ -14,36 +14,36 @@ import (
 	"github.com/shomali11/slacker"
 )
 
-func organzieLunches(d *db.DB, bot *slacker.Slacker) {
-	lunchChannels, err := d.GetBotChannels()
+func organzieLunches(bot *slacker.Slacker) {
+	lunchChannels, err := db.GetLunchChannels()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	bot.Client().ConnectRTM()
-	for _, channelID := range lunchChannels {
-		OrganizeLunch(bot, d, channelID)
+	for _, lunch := range lunchChannels {
+		OrganizeLunch(bot, lunch.ChannelID)
 	}
 }
 
-func OrganizeLunch(bot *slacker.Slacker, d *db.DB, channelID string) {
+func OrganizeLunch(bot *slacker.Slacker, channelID string) {
 	go func() {
 		quit := make(chan error, 1)
 		updateRound := make(chan error, 1)
 
 		for {
-			if err := checkOrganizeReadiness(d, channelID); err != nil {
+			if err := checkOrganizeReadiness(channelID); err != nil {
 				log.Println(err)
 				return
 			}
 
-			go waitForRound(d, channelID, quit, updateRound)
+			go waitForRound(channelID, quit, updateRound)
 
 			select {
 			case err := <-updateRound:
 				{
 
-					if addingError := addNextRound(d, channelID); addingError != nil {
+					if addingError := addNextRound(channelID); addingError != nil {
 						sendError(channelID, bot, addingError)
 						return
 					}
@@ -55,7 +55,7 @@ func OrganizeLunch(bot *slacker.Slacker, d *db.DB, channelID string) {
 						continue
 					}
 
-					selected, selectingError := selectMembers(bot, d, channelID)
+					selected, selectingError := selectMembers(bot, channelID)
 					if selectingError != nil {
 						sendError(channelID, bot, selectingError)
 						return
@@ -76,25 +76,24 @@ func OrganizeLunch(bot *slacker.Slacker, d *db.DB, channelID string) {
 	}()
 }
 
-func checkOrganizeReadiness(d *db.DB, channelID string) error {
-	if freq, err := d.GetFrequencyPerMonth(channelID); freq == nil {
-		if err == nil {
-			err = fmt.Errorf("freq can't be empty")
-		}
+func checkOrganizeReadiness(channelID string) error {
+	lunchInfo, err := db.GetLunchInfo(channelID)
+	if err != nil {
 		return utils.OrganizeError(channelID, err)
 	}
 
-	if nextRound, err := d.GetNextRoundDate(channelID); nextRound == nil {
-		if err == nil {
-			err = fmt.Errorf("nextRound can't be empty")
-		}
+	if lunchInfo.FrequencyPerMonth == 0 {
+		err = fmt.Errorf("freq can't be empty")
 		return utils.OrganizeError(channelID, err)
 	}
 
-	if groupSize, err := d.GetGroupSize(channelID); groupSize == nil {
-		if err == nil {
-			err = fmt.Errorf("groupSize can't be empty")
-		}
+	if lunchInfo.NextRoundDate == nil {
+		err = fmt.Errorf("nextRound can't be empty")
+		return utils.OrganizeError(channelID, err)
+	}
+
+	if lunchInfo.GroupSize == 0 {
+		err = fmt.Errorf("groupSize can't be empty")
 		return utils.OrganizeError(channelID, err)
 	}
 
@@ -102,12 +101,17 @@ func checkOrganizeReadiness(d *db.DB, channelID string) error {
 }
 
 func waitForRound(
-	d *db.DB, channelID string,
+	channelID string,
 	quit chan<- error,
 	updateRound chan<- error,
 ) {
-	nextRound, err := d.GetNextRoundDate(channelID)
+	lunchInfo, err := db.GetLunchInfo(channelID)
 	if err != nil {
+		quit <- err
+		return
+	}
+	nextRound := lunchInfo.NextRoundDate
+	if nextRound == nil {
 		quit <- err //quit if can't get roundDate
 	}
 
@@ -119,11 +123,12 @@ func waitForRound(
 	}
 
 	// quit if dates changed
-	currentRound, err := d.GetNextRoundDate(channelID)
+	lunchInfo, err = db.GetLunchInfo(channelID)
 	if err != nil {
 		quit <- err
 		return
 	}
+	currentRound := lunchInfo.NextRoundDate
 	if !currentRound.Equal(*nextRound) {
 		log.Printf(dateChangeMessage(channelID))
 		quit <- nil
@@ -133,19 +138,20 @@ func waitForRound(
 	updateRound <- nil
 }
 
-func addNextRound(d *db.DB, channelID string) error {
-	currentRound, err := d.GetNextRoundDate(channelID)
+func addNextRound(channelID string) error {
+	lunchInfo, err := db.GetLunchInfo(channelID)
+	if err != nil {
+		return err
+	}
+	currentRound := lunchInfo.NextRoundDate
 	if err != nil {
 		return err
 	}
 
-	freq, err := d.GetFrequencyPerMonth(channelID)
-	if err != nil {
-		return err
-	}
+	freq := lunchInfo.FrequencyPerMonth
 
-	nextRound := currentRound.AddDate(0, 0, 30/(*freq)+1)
-	err = d.AddNextRoundDate(channelID, nextRound)
+	nextRound := currentRound.AddDate(0, 0, 30/freq+1)
+	err = db.AddNextRoundDate(channelID, nextRound)
 	if err != nil {
 		return err
 	}
@@ -153,26 +159,30 @@ func addNextRound(d *db.DB, channelID string) error {
 	return nil
 }
 
-func selectMembers(bot *slacker.Slacker, d *db.DB, channelID string) ([]string, error) {
-	groupSize, err := d.GetGroupSize(channelID)
+func selectMembers(bot *slacker.Slacker, channelID string) ([]string, error) {
+	lunchInfo, err := db.GetLunchInfo(channelID)
 	if err != nil {
 		return nil, err
 	}
+
+	groupSize := lunchInfo.GroupSize
 	info, err := bot.RTM().GetChannelInfo(channelID)
 	if err != nil {
 		return nil, err
 	}
 	members := info.Members
-	log.Println("members", members)
-	selectionLimit := int(math.Min(float64(len(members)), float64(*groupSize)))
-	selected := make([]string, 0, *groupSize)
-	alreadySelectedMembers, err := d.AllMembers(channelID)
+
+	selectionLimit := int(math.Min(float64(len(members)), float64(groupSize)))
+	selected := make([]string, 0, groupSize)
+	alreadySelectedMembers, err := db.AllMembers(channelID)
 	remainingMembers := utils.Difference(members, alreadySelectedMembers)
 	for len(selected) < selectionLimit {
 		// use already selected members if no remaining members remain
 		if len(remainingMembers) == 0 {
 			remainingMembers = alreadySelectedMembers
-			d.DeleteAllSelectedMembers(channelID)
+			if err = db.DeleteAllSelectedMembers(channelID); err != nil {
+				return nil, err
+			}
 		}
 
 		rand.Seed(time.Now().Unix())
@@ -181,8 +191,7 @@ func selectMembers(bot *slacker.Slacker, d *db.DB, channelID string) ([]string, 
 		remainingMembers = utils.Remove(remainingMembers, selectedIndex)
 	}
 
-	err = d.AddMembers(channelID, selected)
-	if err != nil {
+	if err = db.AddMembers(channelID, selected); err != nil {
 		return nil, err
 	}
 

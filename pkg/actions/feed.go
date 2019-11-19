@@ -14,13 +14,12 @@ import (
 )
 
 func selectChannel(
-	database *db.DB,
 	responseURL string,
 	w http.ResponseWriter,
 	selectedChannel string,
 ) {
 	sendPendingResponse(responseURL, w)
-	err := database.AddBotChannel(selectedChannel)
+	err := db.AddLunchChannel(selectedChannel)
 	if err != nil {
 		sendCancelResponse(responseURL, w, err.Error())
 		return
@@ -31,7 +30,6 @@ func selectChannel(
 }
 
 func setFirstRoundDate(
-	database *db.DB,
 	responseURL string,
 	w http.ResponseWriter,
 	channelID string,
@@ -46,7 +44,7 @@ func setFirstRoundDate(
 		return
 	}
 	sendPendingResponse(responseURL, w)
-	err = database.AddNextRoundDate(channelID, nextRound)
+	err = db.AddNextRoundDate(channelID, nextRound)
 	if err != nil {
 		sendCancelResponse(responseURL, w, err.Error())
 		return
@@ -57,7 +55,6 @@ func setFirstRoundDate(
 }
 
 func setFrequencyPerMonth(
-	database *db.DB,
 	responseURL string,
 	w http.ResponseWriter,
 	channelID string,
@@ -69,7 +66,7 @@ func setFrequencyPerMonth(
 		return
 	}
 	sendPendingResponse(responseURL, w)
-	err = database.AddFrequencyPerMonth(channelID, frequency)
+	err = db.AddFrequencyPerMonth(channelID, frequency)
 	if err != nil {
 		sendCancelResponse(responseURL, w, err.Error())
 		return
@@ -81,7 +78,6 @@ func setFrequencyPerMonth(
 
 func setGroupSize(
 	bot *slacker.Slacker,
-	database *db.DB,
 	responseURL string,
 	w http.ResponseWriter,
 	channelID string,
@@ -93,13 +89,13 @@ func setGroupSize(
 		return
 	}
 	sendPendingResponse(responseURL, w)
-	err = database.AddGroupSize(channelID, size)
+	err = db.AddGroupSize(channelID, size)
 	if err != nil {
 		sendCancelResponse(responseURL, w, err.Error())
 		return
 	}
-	commands.OrganizeLunch(bot, database, channelID)
-	successMessage, err := commands.DoneText(database, channelID, bot)
+	commands.OrganizeLunch(bot, channelID)
+	successMessage, err := commands.DoneText(channelID, bot)
 	if err != nil {
 		sendCancelResponse(responseURL, w, err.Error())
 		return

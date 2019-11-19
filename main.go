@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 
-	"github.com/omaressameldin/lunch-roulette/internal/db"
 	"github.com/omaressameldin/lunch-roulette/internal/env"
 	"github.com/omaressameldin/lunch-roulette/pkg/actions"
 	"github.com/omaressameldin/lunch-roulette/pkg/bot"
@@ -12,10 +11,7 @@ import (
 func main() {
 	env.ValidateEnvKeys()
 
-	d := db.OpenDB()
-	defer d.CloseDB()
-
-	b, err := bot.CreateBot(d)
+	b, err := bot.CreateBot()
 	if err != nil {
 		log.Fatal(err)
 	}
