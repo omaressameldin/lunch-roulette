@@ -1,7 +1,7 @@
 ARG APP_SRC=/usr/src/app
 ARG BUILD_FILE=lunch-roulette
 
-FROM golang:1.12.4-alpine
+FROM golang:1.13-alpine
 ARG BUILD_FILE
 ARG APP_SRC
 
