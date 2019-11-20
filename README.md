@@ -46,7 +46,7 @@ exclude |
 
 ## Technologies Used
 - Golang
-- [boltDB](https://github.com/boltdb/bolt)
+- Postgres
 - [shomali11/slacker](https://github.com/shomali11/slacker)
 - [nlopes/slack](https://github.com/nlopes/slack)
 - [ngrok](https://ngrok.com/)
