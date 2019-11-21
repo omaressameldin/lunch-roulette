@@ -52,4 +52,3 @@ exclude |
 - [ngrok](https://ngrok.com/)
 - Docker
 - Docker-compose
-- [Google Drive Api](https://developers.google.com/drive)
