@@ -74,7 +74,7 @@ func FirstRoundDate(channelID string) []slack.Block {
 }
 
 func FrequencyPerMonth(channelID string) []slack.Block {
-	return numberSelect(1, 4, FerquencyPerMonthBlockID, channelID, frequencyPerMonthText)
+	return numberSelect(1, 4, FrequencyPerMonthBlockID, channelID, frequencyPerMonthText)
 }
 
 func GroupSize(channelID string) []slack.Block {

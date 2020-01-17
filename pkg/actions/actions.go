@@ -57,7 +57,7 @@ func HandleActions(bot *bot.Bot) {
 							block.SelectedDate,
 						)
 					}
-				case commands.FerquencyPerMonthBlockID:
+				case commands.FrequencyPerMonthBlockID:
 					{
 						channelID := strings.Split(block.ActionID, commands.NumberActionSeparator)[0]
 						setFrequencyPerMonth(

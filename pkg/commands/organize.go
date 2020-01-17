@@ -150,7 +150,19 @@ func addNextRound(channelID string) error {
 
 	freq := lunchInfo.FrequencyPerMonth
 
-	nextRound := currentRound.AddDate(0, 0, 30/freq+1)
+	nextRound := currentRound.AddDate(0, 0, 30/freq)
+
+	// handle february
+	if int(nextRound.Month()) == 2 {
+		if nextRound.Day() == 2 || nextRound.Day() == 3 {
+			nextRound = nextRound.AddDate(0, 0, 1-nextRound.Day())
+		}
+	}
+
+	// handle months with 31 days
+	if nextRound.Day() == 31 {
+		nextRound = nextRound.AddDate(0, 0, 1)
+	}
 	err = db.AddNextRoundDate(channelID, nextRound)
 	if err != nil {
 		return err

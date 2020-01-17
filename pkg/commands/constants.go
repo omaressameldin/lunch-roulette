@@ -39,7 +39,7 @@ const firstRoundStartText = "_*📅 When should the first round start?*_"
 const RoundTime = "12:30"
 
 // ---- set frequency per month -----
-const FerquencyPerMonthBlockID = "set-frequency-per-month"
+const FrequencyPerMonthBlockID = "set-frequency-per-month"
 const frequencyPerMonthText = "_*🕥 how many times per month do you wanna schedule lunches?*_"
 const frequencyPerMonyhPlaceholder = "pick frequency"
 
